@@ -1,24 +1,54 @@
 package com.hiddentest;
 
-import com.hiddentest.reveal.RevealCommand;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.BanList;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-public final class HiddenTest extends JavaPlugin {
+import java.util.Date;
 
-    private static HiddenTest instance;
+public class DeathListener implements Listener {
 
-    @Override
-    public void onEnable() {
-        instance = this;
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
 
-        getServer().getPluginManager().registerEvents(new ProfileManager(), this);
-        getServer().getPluginManager().registerEvents(new DeathListener(), this);
+        Player victim = event.getEntity();
+        Player killer = victim.getKiller();
 
-        getCommand("reveal").setExecutor(new RevealCommand());
-        getCommand("hide").setExecutor(new RevealCommand());
-    }
+        if (killer == null) return;
 
-    public static HiddenTest getInstance() {
-        return instance;
+        ItemStack weapon = killer.getInventory().getItemInMainHand();
+        if (weapon == null || !weapon.hasItemMeta()) return;
+
+        ItemMeta meta = weapon.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) return;
+
+        String weaponName = ChatColor.stripColor(meta.getDisplayName());
+
+        // Check if weapon name matches killer's EXACT username
+        if (!weaponName.equals(killer.getName())) return;
+
+        // Get victim real name from stored profile
+        String realName = victim.getPlayerProfile().getName();
+
+        // Send messages in order
+        Bukkit.broadcastMessage(ChatColor.RED + realName + " has been caught.");
+        Bukkit.broadcastMessage(ChatColor.YELLOW + realName + " left the game");
+
+        // Ban victim permanently
+        Bukkit.getBanList(BanList.Type.NAME).addBan(
+                victim.getName(),
+                ChatColor.DARK_RED + "Your cover was blown.",
+                null,
+                null
+        );
+
+        // Kick immediately so it looks clean
+        victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
     }
 }
