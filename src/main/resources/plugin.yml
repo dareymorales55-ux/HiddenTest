@@ -1,1 +1,27 @@
+name: HiddenTest
+version: 1.0
+main: com.hiddentest.HiddenTest
+api-version: 1.21
 
+author: YourName
+description: Identity anonymization and reveal testing plugin.
+
+commands:
+  reveal:
+    description: Reveal a player
+    usage: /reveal <player>
+    permission: hiddentest.reveal
+
+  hide:
+    description: Hide a player again
+    usage: /hide <player>
+    permission: hiddentest.hide
+
+permissions:
+  hiddentest.reveal:
+    description: Allows revealing players
+    default: op
+
+  hiddentest.hide:
+    description: Allows hiding players
+    default: op
