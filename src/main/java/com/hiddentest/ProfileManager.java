@@ -1,0 +1,69 @@
+package com.hiddentest;
+
+import com.destroystokyo.paper.profile.PlayerProfile;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class ProfileManager implements Listener {
+
+    private static final Map<UUID, PlayerProfile> realProfiles = new HashMap<>();
+
+    /* =========================
+       JOIN HANDLER
+       ========================= */
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        cacheRealProfile(player);
+        anonymize(player);
+
+        event.setJoinMessage(ChatColor.YELLOW + "Player has joined");
+    }
+
+    /* =========================
+       PROFILE LOGIC
+       ========================= */
+
+    public static void cacheRealProfile(Player player) {
+        realProfiles.put(player.getUniqueId(), player.getPlayerProfile());
+    }
+
+    public static void anonymize(Player player) {
+        PlayerProfile anonymous =
+                Bukkit.createProfileExact(player.getUniqueId(), "Player");
+
+        player.setPlayerProfile(anonymous);
+        player.setDisplayName("Player");
+        player.setPlayerListName("Player");
+
+        refreshPlayer(player);
+    }
+
+    public static void restore(Player player) {
+        PlayerProfile real = realProfiles.get(player.getUniqueId());
+        if (real == null) return;
+
+        player.setPlayerProfile(real);
+        player.setDisplayName(real.getName());
+        player.setPlayerListName(real.getName());
+
+        refreshPlayer(player);
+    }
+
+    private static void refreshPlayer(Player player) {
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            p.hidePlayer(HiddenTest.getInstance(), player);
+            p.showPlayer(HiddenTest.getInstance(), player);
+        });
+    }
+}
