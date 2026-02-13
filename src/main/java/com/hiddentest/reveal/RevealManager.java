@@ -3,8 +3,8 @@ package com.hiddentest.reveal;
 import com.hiddentest.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Scoreboard;
-import org.bukkit.Team;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
