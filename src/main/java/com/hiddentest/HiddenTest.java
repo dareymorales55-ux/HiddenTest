@@ -11,9 +11,11 @@ public final class HiddenTest extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        getServer().getPluginManager().registerEvents(new JoinListener(), this);
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new ProfileManager(), this);
         getServer().getPluginManager().registerEvents(new DeathListener(), this);
 
+        // Register commands
         getCommand("reveal").setExecutor(new RevealCommand());
         getCommand("hide").setExecutor(new RevealCommand());
     }
