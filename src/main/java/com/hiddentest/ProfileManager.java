@@ -31,34 +31,51 @@ public class ProfileManager implements Listener {
     }
 
     /* =========================
-       PROFILE LOGIC
+       PROFILE STORAGE
        ========================= */
 
     public static void cacheRealProfile(Player player) {
         realProfiles.put(player.getUniqueId(), player.getPlayerProfile());
     }
 
+    /* =========================
+       ANONYMIZE (FULL SKIN RESET)
+       ========================= */
+
     public static void anonymize(Player player) {
+
+        // Create completely new profile with random UUID
         PlayerProfile anonymous =
-                Bukkit.createProfileExact(player.getUniqueId(), "Player");
+                Bukkit.createProfile(UUID.randomUUID(), "Player");
 
         player.setPlayerProfile(anonymous);
+
         player.setDisplayName("Player");
         player.setPlayerListName("Player");
 
         refreshPlayer(player);
     }
 
+    /* =========================
+       RESTORE REAL PROFILE
+       ========================= */
+
     public static void restore(Player player) {
+
         PlayerProfile real = realProfiles.get(player.getUniqueId());
         if (real == null) return;
 
         player.setPlayerProfile(real);
+
         player.setDisplayName(real.getName());
         player.setPlayerListName(real.getName());
 
         refreshPlayer(player);
     }
+
+    /* =========================
+       FORCE CLIENT REFRESH
+       ========================= */
 
     private static void refreshPlayer(Player player) {
         Bukkit.getOnlinePlayers().forEach(p -> {
