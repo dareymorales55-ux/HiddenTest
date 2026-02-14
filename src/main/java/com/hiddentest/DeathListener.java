@@ -28,10 +28,10 @@ public class DeathListener implements Listener {
 
         String weaponName = ChatColor.stripColor(meta.getDisplayName());
 
-        String realKillerName = ProfileManager.getRealName(killer);
         String realVictimName = ProfileManager.getRealName(victim);
 
-        if (!weaponName.equals(realKillerName)) return;
+        // 🔥 Weapon must match VICTIM'S real name
+        if (!weaponName.equals(realVictimName)) return;
 
         Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
