@@ -1,5 +1,6 @@
 package com.hiddentest.reveal;
 
+import com.hiddentest.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -26,18 +27,17 @@ public class RevealCommand implements CommandExecutor {
             return true;
         }
 
-        // /reveal
+        String realName = ProfileManager.getRealName(target);
+
         if (label.equalsIgnoreCase("reveal")) {
 
             if (args.length == 2) {
                 try {
                     long seconds = Long.parseLong(args[1]);
-                    long millis = seconds * 1000L;
-
-                    RevealManager.reveal(target, millis);
+                    RevealManager.reveal(target, seconds * 1000L);
 
                     sender.sendMessage(ChatColor.GREEN +
-                            "Revealed " + target.getName() +
+                            "Revealed " + realName +
                             " for " + seconds + " seconds.");
 
                 } catch (NumberFormatException e) {
@@ -45,20 +45,18 @@ public class RevealCommand implements CommandExecutor {
                 }
 
             } else {
-                // Infinite reveal
                 RevealManager.reveal(target);
                 sender.sendMessage(ChatColor.GREEN +
-                        "Revealed " + target.getName() + " indefinitely.");
+                        "Revealed " + realName + " indefinitely.");
             }
         }
 
-        // /hide
         if (label.equalsIgnoreCase("hide")) {
 
             RevealManager.hide(target);
 
             sender.sendMessage(ChatColor.YELLOW +
-                    "Hidden " + target.getName() + ".");
+                    "Hidden " + realName + ".");
         }
 
         return true;
