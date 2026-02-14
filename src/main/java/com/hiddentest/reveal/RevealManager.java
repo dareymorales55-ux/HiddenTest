@@ -4,10 +4,10 @@ import com.hiddentest.HiddenTest;
 import com.hiddentest.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Scoreboard;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
@@ -18,11 +18,10 @@ public class RevealManager {
 
     private static final String TEAM_NAME = "revealed_team";
 
-    // UUID → reveal end time (millis)
+    // UUID → reveal end time
     private static final Map<UUID, Long> revealTimers = new HashMap<>();
 
-    static {
-        // Start repeating task to monitor glowing
+    public static void init() {
         Bukkit.getScheduler().runTaskTimer(
                 HiddenTest.getInstance(),
                 RevealManager::tick,
@@ -31,16 +30,12 @@ public class RevealManager {
         );
     }
 
-    /* =========================
-       PUBLIC METHODS
-       ========================= */
+    /* ========================= */
 
-    // Infinite reveal (used by command)
     public static void reveal(Player player) {
         reveal(player, -1);
     }
 
-    // Timed reveal (milliseconds)
     public static void reveal(Player player, long durationMillis) {
 
         ProfileManager.restore(player);
@@ -50,7 +45,7 @@ public class RevealManager {
             revealTimers.put(player.getUniqueId(),
                     System.currentTimeMillis() + durationMillis);
         } else {
-            revealTimers.put(player.getUniqueId(), -1L); // infinite
+            revealTimers.put(player.getUniqueId(), -1L);
         }
     }
 
@@ -61,14 +56,11 @@ public class RevealManager {
         ProfileManager.anonymize(player);
     }
 
-    /* =========================
-       CORE LOGIC
-       ========================= */
+    /* ========================= */
 
     private static void applyRevealVisuals(Player player) {
 
-        // Apply scoreboard team for red glow
-        org.bukkit.scoreboard.Scoreboard scoreboard =
+        Scoreboard scoreboard =
                 Bukkit.getScoreboardManager().getMainScoreboard();
 
         Team team = scoreboard.getTeam(TEAM_NAME);
@@ -79,7 +71,6 @@ public class RevealManager {
 
         team.addEntry(player.getName());
 
-        // Apply real glowing potion effect
         player.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.GLOWING,
@@ -91,14 +82,15 @@ public class RevealManager {
                 )
         );
 
-        String realName = player.getPlayerProfile().getName();
+        String realName = ProfileManager.getRealName(player);
+
         player.setDisplayName(ChatColor.DARK_RED + realName);
         player.setPlayerListName(ChatColor.DARK_RED + realName);
     }
 
     private static void removeRevealVisuals(Player player) {
 
-        org.bukkit.scoreboard.Scoreboard scoreboard =
+        Scoreboard scoreboard =
                 Bukkit.getScoreboardManager().getMainScoreboard();
 
         Team team = scoreboard.getTeam(TEAM_NAME);
@@ -108,10 +100,6 @@ public class RevealManager {
 
         player.removePotionEffect(PotionEffectType.GLOWING);
     }
-
-    /* =========================
-       TIMER + MILK DETECTION
-       ========================= */
 
     private static void tick() {
 
@@ -124,13 +112,11 @@ public class RevealManager {
 
             long end = revealTimers.get(uuid);
 
-            // Timed reveal check
             if (end != -1 && now >= end) {
                 hide(player);
                 continue;
             }
 
-            // If glowing removed (milk, commands, etc)
             if (!player.hasPotionEffect(PotionEffectType.GLOWING)) {
 
                 player.addPotionEffect(
