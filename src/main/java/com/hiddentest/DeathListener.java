@@ -10,8 +10,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Date;
-
 public class DeathListener implements Listener {
 
     @EventHandler
@@ -30,25 +28,21 @@ public class DeathListener implements Listener {
 
         String weaponName = ChatColor.stripColor(meta.getDisplayName());
 
-        // Check if weapon name matches killer's EXACT username
-        if (!weaponName.equals(killer.getName())) return;
+        String realKillerName = ProfileManager.getRealName(killer);
+        String realVictimName = ProfileManager.getRealName(victim);
 
-        // Get victim real name from stored profile
-        String realName = victim.getPlayerProfile().getName();
+        if (!weaponName.equals(realKillerName)) return;
 
-        // Send messages in order
-        Bukkit.broadcastMessage(ChatColor.RED + realName + " has been caught.");
-        Bukkit.broadcastMessage(ChatColor.YELLOW + realName + " left the game");
+        Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
+        Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
 
-        // Ban victim permanently
         Bukkit.getBanList(BanList.Type.NAME).addBan(
-                victim.getName(),
+                realVictimName,
                 ChatColor.DARK_RED + "Your cover was blown.",
                 null,
                 null
         );
 
-        // Kick immediately so it looks clean
         victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
     }
 }
