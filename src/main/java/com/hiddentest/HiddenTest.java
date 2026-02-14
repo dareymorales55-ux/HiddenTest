@@ -1,6 +1,7 @@
 package com.hiddentest;
 
 import com.hiddentest.reveal.RevealCommand;
+import com.hiddentest.reveal.RevealManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HiddenTest extends JavaPlugin {
@@ -16,6 +17,9 @@ public final class HiddenTest extends JavaPlugin {
 
         getCommand("reveal").setExecutor(new RevealCommand());
         getCommand("hide").setExecutor(new RevealCommand());
+
+        // SAFE scheduler init
+        RevealManager.init();
     }
 
     public static HiddenTest getInstance() {
