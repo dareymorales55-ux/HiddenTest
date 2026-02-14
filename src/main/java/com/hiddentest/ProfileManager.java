@@ -16,10 +16,6 @@ public class ProfileManager implements Listener {
 
     private static final Map<UUID, PlayerProfile> realProfiles = new HashMap<>();
 
-    /* =========================
-       JOIN HANDLER
-       ========================= */
-
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -31,7 +27,17 @@ public class ProfileManager implements Listener {
     }
 
     /* =========================
-       PROFILE STORAGE
+       REAL NAME ACCESSOR
+       ========================= */
+
+    public static String getRealName(Player player) {
+        PlayerProfile real = realProfiles.get(player.getUniqueId());
+        if (real == null) return player.getName();
+        return real.getName();
+    }
+
+    /* =========================
+       STORAGE
        ========================= */
 
     public static void cacheRealProfile(Player player) {
@@ -39,17 +45,15 @@ public class ProfileManager implements Listener {
     }
 
     /* =========================
-       ANONYMIZE (FULL SKIN RESET)
+       ANONYMIZE
        ========================= */
 
     public static void anonymize(Player player) {
 
-        // Create completely new profile with random UUID
         PlayerProfile anonymous =
                 Bukkit.createProfile(UUID.randomUUID(), "Player");
 
         player.setPlayerProfile(anonymous);
-
         player.setDisplayName("Player");
         player.setPlayerListName("Player");
 
@@ -57,7 +61,7 @@ public class ProfileManager implements Listener {
     }
 
     /* =========================
-       RESTORE REAL PROFILE
+       RESTORE
        ========================= */
 
     public static void restore(Player player) {
@@ -66,7 +70,6 @@ public class ProfileManager implements Listener {
         if (real == null) return;
 
         player.setPlayerProfile(real);
-
         player.setDisplayName(real.getName());
         player.setPlayerListName(real.getName());
 
@@ -74,7 +77,7 @@ public class ProfileManager implements Listener {
     }
 
     /* =========================
-       FORCE CLIENT REFRESH
+       CLIENT REFRESH
        ========================= */
 
     private static void refreshPlayer(Player player) {
