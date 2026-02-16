@@ -53,7 +53,7 @@ public class DetectivesCompass implements Listener {
             meta.setLore(lore);
 
             // Enchant glint
-            meta.addEnchant(Enchantment.LUCK, 1, true);
+            meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
