@@ -56,6 +56,11 @@ public class RevealManager {
         ProfileManager.anonymize(player);
     }
 
+    // ✅ Added method
+    public static boolean isRevealed(Player player) {
+        return revealTimers.containsKey(player.getUniqueId());
+    }
+
     /* ========================= */
 
     private static void applyRevealVisuals(Player player) {
