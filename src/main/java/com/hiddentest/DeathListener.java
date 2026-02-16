@@ -37,7 +37,7 @@ public class DeathListener implements Listener {
 
         boolean victimIsRevealed = RevealManager.isRevealed(victim);
 
-        // ✅ If either condition is true → ban
+        // If neither condition is true → do nothing
         if (!nameWeaponMatch && !victimIsRevealed) return;
 
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
@@ -53,9 +53,16 @@ public class DeathListener implements Listener {
         victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
     }
 
-    // ✅ Remove ONLY the automatic quit message
+    // 🔥 FIX: Clean reveal state on logout
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        // If player was revealed, properly hide them
+        if (RevealManager.isRevealed(player)) {
+            RevealManager.hide(player);
+        }
+
         event.setQuitMessage(null);
     }
 }
