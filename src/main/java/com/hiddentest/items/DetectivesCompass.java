@@ -2,7 +2,6 @@ package com.hiddentest.items;
 
 import com.hiddentest.HiddenTest;
 import org.bukkit.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,8 +51,12 @@ public class DetectivesCompass implements Listener {
 
             meta.setLore(lore);
 
-            // Enchant glint
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            // Modern enchant glint (Paper 1.20+)
+            Enchantment unbreaking = Registry.ENCHANTMENT.get(NamespacedKey.minecraft("unbreaking"));
+            if (unbreaking != null) {
+                meta.addEnchant(unbreaking, 1, true);
+            }
+
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 
@@ -112,7 +115,6 @@ public class DetectivesCompass implements Listener {
             if (p.getWorld().getEnvironment() != World.Environment.NORMAL)
                 continue;
 
-            // Skip players within 8 block radius
             if (p.getWorld().equals(hunter.getWorld())) {
                 if (p.getLocation().distance(hunter.getLocation()) <= MIN_TRACK_DISTANCE)
                     continue;
