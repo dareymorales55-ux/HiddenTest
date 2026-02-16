@@ -18,7 +18,6 @@ public class RevealManager {
 
     private static final String TEAM_NAME = "revealed_team";
 
-    // UUID → reveal end time
     private static final Map<UUID, Long> revealTimers = new HashMap<>();
 
     public static void init() {
@@ -50,15 +49,44 @@ public class RevealManager {
     }
 
     public static void hide(Player player) {
-
         revealTimers.remove(player.getUniqueId());
         removeRevealVisuals(player);
         ProfileManager.anonymize(player);
     }
 
-    // ✅ Added method
     public static boolean isRevealed(Player player) {
         return revealTimers.containsKey(player.getUniqueId());
+    }
+
+    public static boolean isRevealed(UUID uuid) {
+        return revealTimers.containsKey(uuid);
+    }
+
+    public static long getRemainingTime(UUID uuid) {
+        if (!revealTimers.containsKey(uuid)) return 0;
+
+        long end = revealTimers.get(uuid);
+        if (end == -1) return -1;
+
+        return end - System.currentTimeMillis();
+    }
+
+    public static void reapplyIfStillRevealed(Player player) {
+
+        UUID uuid = player.getUniqueId();
+
+        if (!revealTimers.containsKey(uuid)) return;
+
+        long remaining = getRemainingTime(uuid);
+
+        if (remaining == 0) {
+            hide(player);
+            return;
+        }
+
+        // Still revealed → restore + visuals
+        ProfileManager.restore(player);
+        applyRevealVisuals(player);
     }
 
     /* ========================= */
@@ -112,18 +140,19 @@ public class RevealManager {
 
         for (UUID uuid : revealTimers.keySet().toArray(new UUID[0])) {
 
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) continue;
-
             long end = revealTimers.get(uuid);
 
             if (end != -1 && now >= end) {
-                hide(player);
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) hide(player);
+                else revealTimers.remove(uuid);
                 continue;
             }
 
-            if (!player.hasPotionEffect(PotionEffectType.GLOWING)) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) continue;
 
+            if (!player.hasPotionEffect(PotionEffectType.GLOWING)) {
                 player.addPotionEffect(
                         new PotionEffect(
                                 PotionEffectType.GLOWING,
