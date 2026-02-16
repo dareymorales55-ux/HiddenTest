@@ -1,5 +1,8 @@
 package com.hiddentest.items;
 
+import org.bukkit.Registry;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import com.hiddentest.HiddenTest;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
