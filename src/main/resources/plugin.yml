@@ -3,7 +3,7 @@ version: 1.0
 main: com.hiddentest.HiddenTest
 api-version: 1.21
 
-author: YourName
+author: Deejay
 description: Identity anonymization and reveal testing plugin.
 
 commands:
@@ -22,6 +22,11 @@ commands:
     usage: /givecompass <player>
     permission: hiddentest.givecompass
 
+  givebell:
+    description: Gives the Bell of Truth
+    usage: /givebell <player>
+    permission: hiddentest.givebell
+
 permissions:
   hiddentest.reveal:
     description: Allows revealing players
@@ -33,4 +38,8 @@ permissions:
 
   hiddentest.givecompass:
     description: Allows giving the Detective's Compass
+    default: op
+
+  hiddentest.givebell:
+    description: Allows giving the Bell of Truth
     default: op
