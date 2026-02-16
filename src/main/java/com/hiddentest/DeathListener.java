@@ -1,5 +1,6 @@
 package com.hiddentest;
 
+import com.hiddentest.reveal.RevealManager;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,22 +22,25 @@ public class DeathListener implements Listener {
 
         if (killer == null) return;
 
-        ItemStack weapon = killer.getInventory().getItemInMainHand();
-        if (weapon == null || !weapon.hasItemMeta()) return;
-
-        ItemMeta meta = weapon.getItemMeta();
-        if (meta == null || !meta.hasDisplayName()) return;
-
-        String weaponName = ChatColor.stripColor(meta.getDisplayName());
         String realVictimName = ProfileManager.getRealName(victim);
 
-        // 🔥 Weapon must match VICTIM'S real name
-        if (!weaponName.equals(realVictimName)) return;
+        boolean nameWeaponMatch = false;
 
-        // ✅ Leave first
+        ItemStack weapon = killer.getInventory().getItemInMainHand();
+        if (weapon != null && weapon.hasItemMeta()) {
+            ItemMeta meta = weapon.getItemMeta();
+            if (meta != null && meta.hasDisplayName()) {
+                String weaponName = ChatColor.stripColor(meta.getDisplayName());
+                nameWeaponMatch = weaponName.equals(realVictimName);
+            }
+        }
+
+        boolean victimIsRevealed = RevealManager.isRevealed(victim);
+
+        // ✅ If either condition is true → ban
+        if (!nameWeaponMatch && !victimIsRevealed) return;
+
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
-
-        // ✅ Then caught
         Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
 
         Bukkit.getBanList(BanList.Type.NAME).addBan(
