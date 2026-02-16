@@ -2,6 +2,7 @@ package com.hiddentest.items;
 
 import com.hiddentest.HiddenTest;
 import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,8 +21,13 @@ public class DetectivesCompass implements Listener {
     private final Map<UUID, Long> cooldowns = new HashMap<>();
     private final Map<UUID, UUID> tracking = new HashMap<>();
 
-    private static final int COOLDOWN_SECONDS = 60;
-    private static final int TRACK_DURATION_SECONDS = 300; // 5 minutes
+    // 15 minute cooldown
+    private static final int COOLDOWN_SECONDS = 15 * 60;
+
+    // 5 minute tracking duration
+    private static final int TRACK_DURATION_SECONDS = 5 * 60;
+
+    private static final double MIN_TRACK_DISTANCE = 8.0;
 
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
@@ -41,11 +47,16 @@ public class DetectivesCompass implements Listener {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Right-click to hunt a random player");
             lore.add(ChatColor.GRAY + "Tracks target for 5 minutes");
+            lore.add(ChatColor.GRAY + "Does not track players within an 8 block radius");
             lore.add(ChatColor.RED + "Overworld only");
 
             meta.setLore(lore);
 
+            // Enchant glint
+            meta.addEnchant(Enchantment.LUCK, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+
             item.setItemMeta(meta);
         }
 
@@ -93,11 +104,21 @@ public class DetectivesCompass implements Listener {
         }
 
         List<Player> possibleTargets = new ArrayList<>();
+
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!p.equals(hunter) &&
-                p.getWorld().getEnvironment() == World.Environment.NORMAL) {
-                possibleTargets.add(p);
+
+            if (p.equals(hunter)) continue;
+
+            if (p.getWorld().getEnvironment() != World.Environment.NORMAL)
+                continue;
+
+            // Skip players within 8 block radius
+            if (p.getWorld().equals(hunter.getWorld())) {
+                if (p.getLocation().distance(hunter.getLocation()) <= MIN_TRACK_DISTANCE)
+                    continue;
             }
+
+            possibleTargets.add(p);
         }
 
         if (possibleTargets.isEmpty()) {
