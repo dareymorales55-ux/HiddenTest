@@ -1,6 +1,7 @@
 package com.hiddentest.reveal;
 
 import com.hiddentest.HiddenTest;
+import com.hiddentest.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -71,7 +72,6 @@ public class HourlyReveal implements Listener {
             return;
         }
 
-        // Play respawn anchor charge sound
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
         }
@@ -88,6 +88,8 @@ public class HourlyReveal implements Listener {
 
             RevealManager.reveal(target, durationMillis);
 
+            String realName = ProfileManager.getRealName(target);
+
             target.sendMessage(
                     ChatColor.DARK_RED +
                     "You have been revealed for " +
@@ -97,7 +99,7 @@ public class HourlyReveal implements Listener {
 
             Bukkit.broadcastMessage(
                     ChatColor.RED +
-                    target.getName() +
+                    realName +
                     " has been revealed for " +
                     minutes +
                     " minutes."
