@@ -17,6 +17,11 @@ commands:
     usage: /hide <player>
     permission: hiddentest.hide
 
+  givecompass:
+    description: Gives a Detective's Compass
+    usage: /givecompass <player>
+    permission: hiddentest.givecompass
+
 permissions:
   hiddentest.reveal:
     description: Allows revealing players
@@ -24,4 +29,8 @@ permissions:
 
   hiddentest.hide:
     description: Allows hiding players
+    default: op
+
+  hiddentest.givecompass:
+    description: Allows giving the Detective's Compass
     default: op
