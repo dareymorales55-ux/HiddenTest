@@ -4,6 +4,7 @@ import org.bukkit.Registry;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import com.hiddentest.HiddenTest;
+import com.hiddentest.ProfileManager;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,12 +24,8 @@ public class DetectivesCompass implements Listener {
     private final Map<UUID, Long> cooldowns = new HashMap<>();
     private final Map<UUID, UUID> tracking = new HashMap<>();
 
-    // 15 minute cooldown
     private static final int COOLDOWN_SECONDS = 15 * 60;
-
-    // 5 minute tracking duration
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
-
     private static final double MIN_TRACK_DISTANCE = 8.0;
 
     public DetectivesCompass(HiddenTest plugin) {
@@ -54,7 +51,6 @@ public class DetectivesCompass implements Listener {
 
             meta.setLore(lore);
 
-            // Modern enchant glint (Paper 1.20+)
             Enchantment unbreaking = Registry.ENCHANTMENT.get(NamespacedKey.minecraft("unbreaking"));
             if (unbreaking != null) {
                 meta.addEnchant(unbreaking, 1, true);
@@ -100,7 +96,6 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
-        // Cooldown check
         if (cooldowns.containsKey(hunter.getUniqueId())) {
             long timeLeft = (cooldowns.get(hunter.getUniqueId()) - System.currentTimeMillis()) / 1000;
             if (timeLeft > 0) {
@@ -136,7 +131,14 @@ public class DetectivesCompass implements Listener {
         hunter.playSound(hunter.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
         target.playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
 
-        hunter.sendMessage(ChatColor.RED + "Hunting " + target.getName());
+        // ✅ Using ProfileManager real name
+        String realName = ProfileManager.getRealName(target);
+
+        hunter.sendMessage(
+                ChatColor.DARK_PURPLE + "You are hunting: " +
+                ChatColor.WHITE + realName
+        );
+
         target.sendMessage(ChatColor.DARK_RED + "You are being hunted.");
 
         cooldowns.put(hunter.getUniqueId(),
