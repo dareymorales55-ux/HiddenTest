@@ -28,7 +28,6 @@ public class HourlyReveal implements Listener {
 
     private static void startCycle() {
 
-        // 10 minute delay before warning
         Bukkit.getScheduler().runTaskLater(
                 HiddenTest.getInstance(),
                 HourlyReveal::warningPhase,
@@ -44,7 +43,6 @@ public class HourlyReveal implements Listener {
                 "Player(s) will be revealed promptly."
         );
 
-        // Wait 5 seconds after warning
         Bukkit.getScheduler().runTaskLater(
                 HiddenTest.getInstance(),
                 HourlyReveal::executeReveal,
@@ -54,31 +52,42 @@ public class HourlyReveal implements Listener {
 
     private static void executeReveal() {
 
-        Collection<? extends Player> online = Bukkit.getOnlinePlayers();
-        if (online.isEmpty()) {
-            scheduleNextCycle();
+        List<Player> eligible = new ArrayList<>();
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!RevealManager.isRevealed(p)) {
+                eligible.add(p);
+            }
+        }
+
+        if (eligible.isEmpty()) {
+            Bukkit.broadcastMessage(
+                    ChatColor.RED.toString() +
+                    ChatColor.BOLD +
+                    "All players are already revealed, waiting for available candidates."
+            );
+
+            waitForEligiblePlayers();
             return;
         }
 
-        // Play respawn anchor charge sound to all players
-        for (Player p : online) {
+        // Play respawn anchor charge sound
+        for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
         }
 
-        List<Player> players = new ArrayList<>(online);
-        Collections.shuffle(players);
+        Collections.shuffle(eligible);
 
-        int revealCount = players.size() >= 2 ? random.nextInt(2) + 1 : 1;
+        int revealCount = eligible.size() >= 2 ? random.nextInt(2) + 1 : 1;
 
         int minutes = 5 + random.nextInt(11); // 5-15 inclusive
         long durationMillis = minutes * 60L * 1000L;
 
-        for (int i = 0; i < revealCount && i < players.size(); i++) {
-            Player target = players.get(i);
+        for (int i = 0; i < revealCount && i < eligible.size(); i++) {
+            Player target = eligible.get(i);
 
             RevealManager.reveal(target, durationMillis);
 
-            // Personal message
             target.sendMessage(
                     ChatColor.DARK_RED +
                     "You have been revealed for " +
@@ -86,7 +95,6 @@ public class HourlyReveal implements Listener {
                     " minutes."
             );
 
-            // Global message
             Bukkit.broadcastMessage(
                     ChatColor.RED +
                     target.getName() +
@@ -96,7 +104,6 @@ public class HourlyReveal implements Listener {
             );
         }
 
-        // Schedule end sound when reveal expires
         Bukkit.getScheduler().runTaskLater(
                 HiddenTest.getInstance(),
                 () -> {
@@ -109,9 +116,28 @@ public class HourlyReveal implements Listener {
         );
     }
 
+    private static void waitForEligiblePlayers() {
+
+        Bukkit.getScheduler().runTaskTimer(
+                HiddenTest.getInstance(),
+                task -> {
+
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (!RevealManager.isRevealed(p)) {
+                            task.cancel();
+                            executeReveal();
+                            return;
+                        }
+                    }
+
+                },
+                20L,
+                20L
+        );
+    }
+
     private static void scheduleNextCycle() {
 
-        // Wait 1 hour before restarting cycle
         Bukkit.getScheduler().runTaskLater(
                 HiddenTest.getInstance(),
                 HourlyReveal::startCycle,
