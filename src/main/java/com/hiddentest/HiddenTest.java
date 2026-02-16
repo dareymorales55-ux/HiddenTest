@@ -1,5 +1,6 @@
 package com.hiddentest;
 
+import com.hiddentest.commands.GiveCompassCommand;
 import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
