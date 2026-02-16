@@ -33,11 +33,10 @@ public class DeathListener implements Listener {
         // 🔥 Weapon must match VICTIM'S real name
         if (!weaponName.equals(realVictimName)) return;
 
-        // ✅ Remove vanilla death message
-        event.setDeathMessage(null);
-
-        // ✅ Switch order: Leave first, then caught
+        // ✅ Leave first
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
+
+        // ✅ Then caught
         Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
 
         Bukkit.getBanList(BanList.Type.NAME).addBan(
@@ -50,7 +49,7 @@ public class DeathListener implements Listener {
         victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
     }
 
-    // ✅ Suppress automatic quit message
+    // ✅ Remove ONLY the automatic quit message
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         event.setQuitMessage(null);
