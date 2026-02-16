@@ -2,6 +2,7 @@ package com.hiddentest;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import com.hiddentest.reveal.RevealManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -37,14 +38,18 @@ public class ProfileManager implements Listener {
         Player player = event.getPlayer();
 
         cacheRealProfile(player);
-        anonymize(player);
+
+        // 🔥 If still revealed, reapply reveal instead of anonymizing
+        if (RevealManager.isRevealed(player.getUniqueId())) {
+            RevealManager.reapplyIfStillRevealed(player);
+        } else {
+            anonymize(player);
+        }
 
         event.setJoinMessage(ChatColor.YELLOW + "Player has joined");
     }
 
-    /* =========================
-       REAL NAME ACCESSOR
-       ========================= */
+    /* ========================= */
 
     public static String getRealName(Player player) {
         PlayerProfile real = realProfiles.get(player.getUniqueId());
@@ -52,17 +57,9 @@ public class ProfileManager implements Listener {
         return real.getName();
     }
 
-    /* =========================
-       STORAGE
-       ========================= */
-
     public static void cacheRealProfile(Player player) {
         realProfiles.put(player.getUniqueId(), player.getPlayerProfile());
     }
-
-    /* =========================
-       ANONYMIZE (FIXED SKIN)
-       ========================= */
 
     public static void anonymize(Player player) {
 
@@ -80,10 +77,6 @@ public class ProfileManager implements Listener {
         refreshPlayer(player);
     }
 
-    /* =========================
-       RESTORE REAL PROFILE
-       ========================= */
-
     public static void restore(Player player) {
 
         PlayerProfile real = realProfiles.get(player.getUniqueId());
@@ -95,10 +88,6 @@ public class ProfileManager implements Listener {
 
         refreshPlayer(player);
     }
-
-    /* =========================
-       CLIENT REFRESH
-       ========================= */
 
     private static void refreshPlayer(Player player) {
         Bukkit.getOnlinePlayers().forEach(p -> {
