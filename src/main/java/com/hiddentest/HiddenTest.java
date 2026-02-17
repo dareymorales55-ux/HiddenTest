@@ -2,6 +2,7 @@ package com.hiddentest;
 
 import com.hiddentest.commands.GiveCompassCommand;
 import com.hiddentest.commands.GiveBellCommand;
+import com.hiddentest.hearts.EggHeart; // ✅ ADD THIS
 import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
 import com.hiddentest.reveal.HourlyReveal;
@@ -32,6 +33,9 @@ public final class HiddenTest extends JavaPlugin {
 
         // 🐉 Dragon Egg listener
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
+
+        // ❤️ Egg Heart system
+        getServer().getPluginManager().registerEvents(new EggHeart(this), this); // ✅ REGISTERED
 
         // Commands
         getCommand("reveal").setExecutor(new RevealCommand());
