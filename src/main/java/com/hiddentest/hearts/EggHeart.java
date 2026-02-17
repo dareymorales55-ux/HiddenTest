@@ -115,11 +115,11 @@ public class EggHeart implements Listener {
         double newMax = BASE_HEALTH + (bonusHearts * 2);
         if (newMax > MAX_HEALTH) newMax = MAX_HEALTH;
 
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(newMax);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(newMax);
     }
 
     private void removeHearts(Player player) {
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(BASE_HEALTH);
+        player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(BASE_HEALTH);
     }
 
     /* =======================================================
