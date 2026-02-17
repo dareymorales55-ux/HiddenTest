@@ -62,6 +62,11 @@ public class DragonEgg implements Listener {
                     // Reveal nearby players for 5 seconds
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (!target.getWorld().equals(player.getWorld())) continue;
+                        
+                        // 🔥✨ CHANGE START: DO NOT REVEAL THE USER ✨🔥
+                        if (target.getUniqueId().equals(player.getUniqueId())) continue;
+                        // 🔥✨ CHANGE END ✨🔥
+
                         if (target.getLocation().distance(player.getLocation()) <= RADIUS) {
                             RevealManager.reveal(target, REVEAL_DURATION);
                         }
@@ -83,7 +88,9 @@ public class DragonEgg implements Listener {
                 }
 
                 // Spawn moving 8-block radius purple particle ring around the ringer
-                int points = 40;
+                // 🔥✨ CHANGE START: INCREASED PARTICLE DENSITY (40 -> 120) ✨🔥
+                int points = 120;
+                // 🔥✨ CHANGE END ✨🔥
                 double y = player.getLocation().getY() + 1.0;
                 for (int i = 0; i < points; i++) {
                     double angle = 2 * Math.PI * i / points;
