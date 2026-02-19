@@ -26,7 +26,10 @@ public class BellOfTruth implements Listener {
     private final Map<UUID, Long> cooldowns = new HashMap<>();
 
     private static final double RADIUS = 15.0;
-    private static final long REVEAL_DURATION = 15 * 60 * 1000L; // 15 minutes
+
+    // ✅ USE TICKS (15 minutes)
+    private static final int REVEAL_DURATION = 15 * 60 * 20; // 18,000 ticks
+
     private static final int COOLDOWN_SECONDS = 300; // 5 minutes
 
     public BellOfTruth(HiddenTest plugin) {
@@ -136,6 +139,7 @@ public class BellOfTruth implements Listener {
             if (!target.getWorld().equals(center.getWorld())) continue;
             if (target.getLocation().distance(center) > RADIUS) continue;
 
+            // ✅ NOW CORRECT (ticks)
             RevealManager.reveal(target, REVEAL_DURATION);
         }
     }
@@ -229,7 +233,6 @@ public class BellOfTruth implements Listener {
 
         meta.setLore(lore);
 
-        // ✨ Enchant glow
         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
