@@ -11,6 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class DeathListener implements Listener {
 
@@ -39,6 +40,13 @@ public class DeathListener implements Listener {
 
         if (!nameWeaponMatch && !victimIsRevealed) return;
 
+        // 🔥 Mark as caught so we suppress quit message
+        victim.setMetadata("caught",
+                new FixedMetadataValue(HiddenTest.getInstance(), true));
+
+        // Optional: clear reveal state for safety
+        RevealManager.hide(victim);
+
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
         Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
 
@@ -52,9 +60,15 @@ public class DeathListener implements Listener {
         victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
     }
 
-    // ✅ DO NOT clear reveal on logout anymore
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        event.setQuitMessage(null);
+
+        Player player = event.getPlayer();
+
+        // Only suppress quit message if they were caught
+        if (player.hasMetadata("caught")) {
+            event.setQuitMessage(null);
+            player.removeMetadata("caught", HiddenTest.getInstance());
+        }
     }
 }
