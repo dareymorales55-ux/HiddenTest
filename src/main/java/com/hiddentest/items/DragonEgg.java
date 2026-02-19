@@ -21,7 +21,10 @@ public class DragonEgg implements Listener {
     private final HiddenTest plugin;
 
     private static final double RADIUS = 8.0;
-    private static final long REVEAL_DURATION = 5 * 1000L;
+
+    // ✅ FIXED: 5 seconds in ticks (NOT milliseconds)
+    private static final int REVEAL_DURATION = 5 * 20; // 100 ticks
+
     private static final int COOLDOWN_SECONDS = 20;
 
     private final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -30,10 +33,6 @@ public class DragonEgg implements Listener {
         this.plugin = plugin;
         startPassiveTask();
     }
-
-    /* =========================================================
-       RIGHT CLICK ABILITY
-       ========================================================= */
 
     @EventHandler
     public void onUse(PlayerInteractEvent event) {
@@ -55,7 +54,6 @@ public class DragonEgg implements Listener {
 
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
 
-        // 🐉 DRAGON GROWL SOUND
         player.getWorld().playSound(
                 player.getLocation(),
                 Sound.ENTITY_ENDER_DRAGON_GROWL,
@@ -78,6 +76,7 @@ public class DragonEgg implements Listener {
                         if (target.equals(player)) continue;
 
                         if (target.getLocation().distance(player.getLocation()) <= RADIUS) {
+                            // ✅ Now correct type
                             RevealManager.reveal(target, REVEAL_DURATION);
                         }
                     }
@@ -108,10 +107,6 @@ public class DragonEgg implements Listener {
         }.runTaskTimer(plugin, 0L, 20L);
     }
 
-    /* =========================================================
-       PASSIVE TASK (Conversion + Locator + Particles)
-       ========================================================= */
-
     private void startPassiveTask() {
 
         new BukkitRunnable() {
@@ -121,11 +116,9 @@ public class DragonEgg implements Listener {
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
-                    // 🔥 AUTO CONVERT ANY NORMAL DRAGON EGG
                     for (int i = 0; i < player.getInventory().getSize(); i++) {
 
                         ItemStack item = player.getInventory().getItem(i);
-
                         if (item == null) continue;
 
                         if (item.getType() == Material.DRAGON_EGG && !isDragonEgg(item)) {
@@ -163,8 +156,6 @@ public class DragonEgg implements Listener {
 
         }.runTaskTimer(plugin, 0L, 20L);
     }
-
-    /* ========================================================= */
 
     private void spawnRing(Player player) {
 
