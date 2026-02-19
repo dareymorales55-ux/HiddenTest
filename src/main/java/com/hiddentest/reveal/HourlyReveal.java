@@ -80,13 +80,15 @@ public class HourlyReveal implements Listener {
 
         int revealCount = eligible.size() >= 2 ? random.nextInt(2) + 1 : 1;
 
-        int minutes = 5 + random.nextInt(11); // 5-15 inclusive
-        long durationMillis = minutes * 60L * 1000L;
+        int minutes = 5 + random.nextInt(11); // 5–15 inclusive
+
+        // ✅ CONVERT TO TICKS
+        int durationTicks = minutes * 60 * 20;
 
         for (int i = 0; i < revealCount && i < eligible.size(); i++) {
             Player target = eligible.get(i);
 
-            RevealManager.reveal(target, durationMillis);
+            RevealManager.reveal(target, durationTicks);
 
             String realName = ProfileManager.getRealName(target);
 
@@ -114,7 +116,7 @@ public class HourlyReveal implements Listener {
                     }
                     scheduleNextCycle();
                 },
-                minutes * 60 * 20L
+                durationTicks // ✅ uses same tick duration
         );
     }
 
