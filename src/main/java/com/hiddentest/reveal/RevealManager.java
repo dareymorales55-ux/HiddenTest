@@ -19,7 +19,7 @@ public class RevealManager {
 
     private static final String TEAM_NAME = "revealed_team";
 
-    // Stores remaining reveal time in TICKS
+    // Remaining reveal time in TICKS (-1 = permanent)
     private static final Map<UUID, Integer> revealTimers = new HashMap<>();
 
     public static void init() {
@@ -31,13 +31,13 @@ public class RevealManager {
         );
     }
 
-    /* ========================= */
+    /* ================================================= */
 
     public static void reveal(Player player) {
         reveal(player, -1);
     }
 
-    // durationTicks, NOT milliseconds
+    // durationTicks (NOT milliseconds)
     public static void reveal(Player player, int durationTicks) {
 
         ProfileManager.restore(player);
@@ -45,7 +45,7 @@ public class RevealManager {
         if (durationTicks > 0) {
             revealTimers.put(player.getUniqueId(), durationTicks);
         } else {
-            revealTimers.put(player.getUniqueId(), -1); // permanent reveal
+            revealTimers.put(player.getUniqueId(), -1);
         }
 
         applyRevealVisuals(player, durationTicks);
@@ -72,7 +72,6 @@ public class RevealManager {
     public static void reapplyIfStillRevealed(Player player) {
 
         UUID uuid = player.getUniqueId();
-
         if (!revealTimers.containsKey(uuid)) return;
 
         int remaining = revealTimers.get(uuid);
@@ -86,14 +85,13 @@ public class RevealManager {
         applyRevealVisuals(player, remaining);
     }
 
-    /* ========================= */
+    /* ================================================= */
 
     private static void applyRevealVisuals(Player player, int durationTicks) {
 
-        Scoreboard scoreboard =
-                Bukkit.getScoreboardManager().getMainScoreboard();
-
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = scoreboard.getTeam(TEAM_NAME);
+
         if (team == null) {
             team = scoreboard.registerNewTeam(TEAM_NAME);
             team.setColor(ChatColor.DARK_RED);
@@ -101,37 +99,29 @@ public class RevealManager {
 
         team.addEntry(player.getName());
 
-        int glowDuration;
+        int glowDuration = (durationTicks == -1)
+                ? Integer.MAX_VALUE
+                : Math.max(1, durationTicks);
 
-        if (durationTicks == -1) {
-            glowDuration = Integer.MAX_VALUE;
-        } else {
-            glowDuration = Math.max(1, durationTicks);
-        }
-
-        player.addPotionEffect(
-                new PotionEffect(
-                        PotionEffectType.GLOWING,
-                        glowDuration,
-                        0,
-                        false,
-                        false,
-                        false
-                )
-        );
+        player.addPotionEffect(new PotionEffect(
+                PotionEffectType.GLOWING,
+                glowDuration,
+                0,
+                false,
+                false,
+                false
+        ));
 
         String realName = ProfileManager.getRealName(player);
-
         player.setDisplayName(ChatColor.DARK_RED + realName);
         player.setPlayerListName(ChatColor.DARK_RED + realName);
     }
 
     private static void removeRevealVisuals(Player player) {
 
-        Scoreboard scoreboard =
-                Bukkit.getScoreboardManager().getMainScoreboard();
-
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = scoreboard.getTeam(TEAM_NAME);
+
         if (team != null) {
             team.removeEntry(player.getName());
         }
@@ -150,14 +140,13 @@ public class RevealManager {
             UUID uuid = entry.getKey();
             int remaining = entry.getValue();
 
-            if (remaining == -1) continue; // permanent reveal
+            if (remaining == -1) continue; // permanent
 
             remaining--;
 
             if (remaining <= 0) {
 
                 Player player = Bukkit.getPlayer(uuid);
-
                 if (player != null) {
                     hide(player);
                 }
