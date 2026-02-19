@@ -11,6 +11,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,14 +19,15 @@ public class RevealManager {
 
     private static final String TEAM_NAME = "revealed_team";
 
-    private static final Map<UUID, Long> revealTimers = new HashMap<>();
+    // Stores remaining reveal time in TICKS
+    private static final Map<UUID, Integer> revealTimers = new HashMap<>();
 
     public static void init() {
         Bukkit.getScheduler().runTaskTimer(
                 HiddenTest.getInstance(),
                 RevealManager::tick,
-                20L,
-                20L
+                1L,
+                1L
         );
     }
 
@@ -35,17 +37,18 @@ public class RevealManager {
         reveal(player, -1);
     }
 
-    public static void reveal(Player player, long durationMillis) {
+    // durationTicks, NOT milliseconds
+    public static void reveal(Player player, int durationTicks) {
 
         ProfileManager.restore(player);
-        applyRevealVisuals(player);
 
-        if (durationMillis > 0) {
-            revealTimers.put(player.getUniqueId(),
-                    System.currentTimeMillis() + durationMillis);
+        if (durationTicks > 0) {
+            revealTimers.put(player.getUniqueId(), durationTicks);
         } else {
-            revealTimers.put(player.getUniqueId(), -1L);
+            revealTimers.put(player.getUniqueId(), -1); // permanent reveal
         }
+
+        applyRevealVisuals(player, durationTicks);
     }
 
     public static void hide(Player player) {
@@ -62,13 +65,8 @@ public class RevealManager {
         return revealTimers.containsKey(uuid);
     }
 
-    public static long getRemainingTime(UUID uuid) {
-        if (!revealTimers.containsKey(uuid)) return 0;
-
-        long end = revealTimers.get(uuid);
-        if (end == -1) return -1;
-
-        return end - System.currentTimeMillis();
+    public static int getRemainingTicks(UUID uuid) {
+        return revealTimers.getOrDefault(uuid, 0);
     }
 
     public static void reapplyIfStillRevealed(Player player) {
@@ -77,21 +75,20 @@ public class RevealManager {
 
         if (!revealTimers.containsKey(uuid)) return;
 
-        long remaining = getRemainingTime(uuid);
+        int remaining = revealTimers.get(uuid);
 
         if (remaining == 0) {
             hide(player);
             return;
         }
 
-        // Still revealed → restore + visuals
         ProfileManager.restore(player);
-        applyRevealVisuals(player);
+        applyRevealVisuals(player, remaining);
     }
 
     /* ========================= */
 
-    private static void applyRevealVisuals(Player player) {
+    private static void applyRevealVisuals(Player player, int durationTicks) {
 
         Scoreboard scoreboard =
                 Bukkit.getScoreboardManager().getMainScoreboard();
@@ -104,10 +101,18 @@ public class RevealManager {
 
         team.addEntry(player.getName());
 
+        int glowDuration;
+
+        if (durationTicks == -1) {
+            glowDuration = Integer.MAX_VALUE;
+        } else {
+            glowDuration = Math.max(1, durationTicks);
+        }
+
         player.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.GLOWING,
-                        Integer.MAX_VALUE,
+                        glowDuration,
                         0,
                         false,
                         false,
@@ -136,34 +141,32 @@ public class RevealManager {
 
     private static void tick() {
 
-        long now = System.currentTimeMillis();
+        Iterator<Map.Entry<UUID, Integer>> iterator =
+                revealTimers.entrySet().iterator();
 
-        for (UUID uuid : revealTimers.keySet().toArray(new UUID[0])) {
+        while (iterator.hasNext()) {
 
-            long end = revealTimers.get(uuid);
+            Map.Entry<UUID, Integer> entry = iterator.next();
+            UUID uuid = entry.getKey();
+            int remaining = entry.getValue();
 
-            if (end != -1 && now >= end) {
+            if (remaining == -1) continue; // permanent reveal
+
+            remaining--;
+
+            if (remaining <= 0) {
+
                 Player player = Bukkit.getPlayer(uuid);
-                if (player != null) hide(player);
-                else revealTimers.remove(uuid);
+
+                if (player != null) {
+                    hide(player);
+                }
+
+                iterator.remove();
                 continue;
             }
 
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) continue;
-
-            if (!player.hasPotionEffect(PotionEffectType.GLOWING)) {
-                player.addPotionEffect(
-                        new PotionEffect(
-                                PotionEffectType.GLOWING,
-                                Integer.MAX_VALUE,
-                                0,
-                                false,
-                                false,
-                                false
-                        )
-                );
-            }
+            entry.setValue(remaining);
         }
     }
 }
