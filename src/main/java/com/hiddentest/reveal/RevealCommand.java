@@ -33,8 +33,12 @@ public class RevealCommand implements CommandExecutor {
 
             if (args.length == 2) {
                 try {
-                    long seconds = Long.parseLong(args[1]);
-                    RevealManager.reveal(target, seconds * 1000L);
+                    int seconds = Integer.parseInt(args[1]);
+
+                    // ✅ Convert seconds → ticks
+                    int durationTicks = seconds * 20;
+
+                    RevealManager.reveal(target, durationTicks);
 
                     sender.sendMessage(ChatColor.GREEN +
                             "Revealed " + realName +
