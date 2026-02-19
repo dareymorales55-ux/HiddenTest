@@ -55,6 +55,7 @@ public class DragonEgg implements Listener {
 
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
 
+        // 🐉 DRAGON GROWL SOUND
         player.getWorld().playSound(
                 player.getLocation(),
                 Sound.ENTITY_ENDER_DRAGON_GROWL,
@@ -108,7 +109,7 @@ public class DragonEgg implements Listener {
     }
 
     /* =========================================================
-       PASSIVE TASK (Locator + Particles)
+       PASSIVE TASK (Conversion + Locator + Particles)
        ========================================================= */
 
     private void startPassiveTask() {
@@ -119,6 +120,18 @@ public class DragonEgg implements Listener {
             public void run() {
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
+
+                    // 🔥 AUTO CONVERT ANY NORMAL DRAGON EGG
+                    for (int i = 0; i < player.getInventory().getSize(); i++) {
+
+                        ItemStack item = player.getInventory().getItem(i);
+
+                        if (item == null) continue;
+
+                        if (item.getType() == Material.DRAGON_EGG && !isDragonEgg(item)) {
+                            player.getInventory().setItem(i, createDragonEgg());
+                        }
+                    }
 
                     boolean hasEgg = hasDragonEgg(player);
 
@@ -206,10 +219,6 @@ public class DragonEgg implements Listener {
 
         return remaining;
     }
-
-    /* =========================================================
-       ITEM CREATION
-       ========================================================= */
 
     public static ItemStack createDragonEgg() {
 
