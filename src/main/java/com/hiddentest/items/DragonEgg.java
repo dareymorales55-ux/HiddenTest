@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,11 +22,9 @@ public class DragonEgg implements Listener {
     private final HiddenTest plugin;
 
     private static final double RADIUS = 8.0;
-
-    // ✅ FIXED: 5 seconds in ticks (NOT milliseconds)
-    private static final int REVEAL_DURATION = 5 * 20; // 100 ticks
-
+    private static final int REVEAL_DURATION = 5 * 20; // 5 seconds
     private static final int COOLDOWN_SECONDS = 20;
+    private static final int COOLDOWN_TICKS = COOLDOWN_SECONDS * 20;
 
     private final Map<UUID, Long> cooldowns = new HashMap<>();
 
@@ -36,6 +35,10 @@ public class DragonEgg implements Listener {
 
     @EventHandler
     public void onUse(PlayerInteractEvent event) {
+
+        // ✅ RIGHT CLICK ONLY
+        if (event.getAction() != Action.RIGHT_CLICK_AIR &&
+            event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         if (!event.hasItem()) return;
 
@@ -52,7 +55,11 @@ public class DragonEgg implements Listener {
             return;
         }
 
+        // ✅ Start cooldown timer
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
+
+        // ✅ Apply vanilla visual cooldown
+        player.setCooldown(Material.DRAGON_EGG, COOLDOWN_TICKS);
 
         player.getWorld().playSound(
                 player.getLocation(),
@@ -76,7 +83,6 @@ public class DragonEgg implements Listener {
                         if (target.equals(player)) continue;
 
                         if (target.getLocation().distance(player.getLocation()) <= RADIUS) {
-                            // ✅ Now correct type
                             RevealManager.reveal(target, REVEAL_DURATION);
                         }
                     }
