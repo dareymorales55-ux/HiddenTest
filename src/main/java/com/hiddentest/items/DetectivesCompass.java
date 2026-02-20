@@ -46,7 +46,7 @@ public class DetectivesCompass implements Listener {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Right-click to hunt a random player");
             lore.add(ChatColor.GRAY + "Tracks target for 5 minutes");
-            lore.add(ChatColor.GRAY + "Does not track players within an 8 block radius");
+            lore.add(ChatColor.GRAY + "Does not track players within 8 blocks");
             lore.add(ChatColor.RED + "Overworld only");
 
             meta.setLore(lore);
@@ -96,10 +96,14 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
+        // COOLDOWN CHECK
+        long now = System.currentTimeMillis();
         if (cooldowns.containsKey(hunter.getUniqueId())) {
-            long timeLeft = (cooldowns.get(hunter.getUniqueId()) - System.currentTimeMillis()) / 1000;
-            if (timeLeft > 0) {
-                hunter.sendMessage(ChatColor.RED + "Cooldown: " + formatTime((int) timeLeft));
+            long expires = cooldowns.get(hunter.getUniqueId());
+            long secondsLeft = (expires - now) / 1000;
+
+            if (secondsLeft > 0) {
+                hunter.sendMessage(ChatColor.RED + "Cooldown: " + formatTime((int) secondsLeft));
                 return;
             }
         }
@@ -109,9 +113,7 @@ public class DetectivesCompass implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()) {
 
             if (p.equals(hunter)) continue;
-
-            if (p.getWorld().getEnvironment() != World.Environment.NORMAL)
-                continue;
+            if (p.getWorld().getEnvironment() != World.Environment.NORMAL) continue;
 
             if (p.getWorld().equals(hunter.getWorld())) {
                 if (p.getLocation().distance(hunter.getLocation()) <= MIN_TRACK_DISTANCE)
@@ -131,19 +133,15 @@ public class DetectivesCompass implements Listener {
         hunter.playSound(hunter.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
         target.playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
 
-        // ✅ Using ProfileManager real name
         String realName = ProfileManager.getRealName(target);
 
-        hunter.sendMessage(
-                ChatColor.DARK_PURPLE + "You are hunting: " +
-                ChatColor.WHITE + realName
-        );
-
+        hunter.sendMessage(ChatColor.DARK_PURPLE + "You are hunting: " + ChatColor.WHITE + realName);
         target.sendMessage(ChatColor.DARK_RED + "You are being hunted.");
 
-        cooldowns.put(hunter.getUniqueId(),
-                System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
+        long expireTime = now + (COOLDOWN_SECONDS * 1000L);
+        cooldowns.put(hunter.getUniqueId(), expireTime);
 
+        // VISUAL ITEM COOLDOWN (ticks must be int)
         hunter.setCooldown(Material.COMPASS, COOLDOWN_SECONDS * 20);
 
         tracking.put(hunter.getUniqueId(), target.getUniqueId());
@@ -152,14 +150,15 @@ public class DetectivesCompass implements Listener {
     }
 
     // =========================
-    // TRACKING LOGIC
+    // TRACKING LOGIC (SMOOTH)
     // =========================
 
     private void startTracking(Player hunter, Player target) {
 
         new BukkitRunnable() {
 
-            int timeLeft = TRACK_DURATION_SECONDS;
+            int secondsLeft = TRACK_DURATION_SECONDS;
+            int tickCounter = 0;
 
             @Override
             public void run() {
@@ -181,16 +180,23 @@ public class DetectivesCompass implements Listener {
                 String arrow = getDirectionArrow(hunter, target);
 
                 hunter.sendActionBar(ChatColor.RED + "" + ChatColor.BOLD +
-                        formatTime(timeLeft) + ChatColor.GRAY +
+                        formatTime(secondsLeft) + ChatColor.GRAY +
                         " | " + (int) distance + "m " + arrow);
 
-                target.sendActionBar(ChatColor.RED + formatTime(timeLeft));
+                target.sendActionBar(ChatColor.RED + formatTime(secondsLeft));
 
-                if (--timeLeft <= 0) {
-                    hunter.sendMessage(ChatColor.GRAY + "Hunt ended.");
-                    target.sendMessage(ChatColor.GRAY + "Hunt ended.");
-                    end();
-                    cancel();
+                tickCounter += 2;
+
+                if (tickCounter >= 20) {
+                    tickCounter = 0;
+                    secondsLeft--;
+
+                    if (secondsLeft <= 0) {
+                        hunter.sendMessage(ChatColor.GRAY + "Hunt ended.");
+                        target.sendMessage(ChatColor.GRAY + "Hunt ended.");
+                        end();
+                        cancel();
+                    }
                 }
             }
 
@@ -203,7 +209,7 @@ public class DetectivesCompass implements Listener {
                 }
             }
 
-        }.runTaskTimer(plugin, 0L, 20L);
+        }.runTaskTimer(plugin, 0L, 2L); // smooth update
     }
 
     // =========================
