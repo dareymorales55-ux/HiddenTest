@@ -22,7 +22,7 @@ public class DragonEgg implements Listener {
     private final HiddenTest plugin;
 
     private static final double RADIUS = 8.0;
-    private static final int REVEAL_DURATION = 5 * 20; // 5 seconds
+    private static final int REVEAL_DURATION = 5 * 20;
     private static final int COOLDOWN_SECONDS = 20;
     private static final int COOLDOWN_TICKS = COOLDOWN_SECONDS * 20;
 
@@ -36,7 +36,6 @@ public class DragonEgg implements Listener {
     @EventHandler
     public void onUse(PlayerInteractEvent event) {
 
-        // ✅ RIGHT CLICK ONLY
         if (event.getAction() != Action.RIGHT_CLICK_AIR &&
             event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
@@ -45,20 +44,19 @@ public class DragonEgg implements Listener {
         ItemStack item = event.getItem();
         if (!isDragonEgg(item)) return;
 
+        // ❌ Prevent placing the egg
+        event.setCancelled(true);
+
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
         long remaining = getCooldownRemaining(uuid);
         if (remaining > 0) {
             player.sendMessage(ChatColor.RED + "Dragon Egg on cooldown: " + remaining + "s");
-            event.setCancelled(true);
             return;
         }
 
-        // ✅ Start cooldown timer
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
-
-        // ✅ Apply vanilla visual cooldown
         player.setCooldown(Material.DRAGON_EGG, COOLDOWN_TICKS);
 
         player.getWorld().playSound(
@@ -122,6 +120,7 @@ public class DragonEgg implements Listener {
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
+                    // Replace normal eggs with custom egg
                     for (int i = 0; i < player.getInventory().getSize(); i++) {
 
                         ItemStack item = player.getInventory().getItem(i);
@@ -134,6 +133,7 @@ public class DragonEgg implements Listener {
 
                     boolean hasEgg = hasDragonEgg(player);
 
+                    // 🔥 Locator Bar Fix
                     AttributeInstance transmit =
                             player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
 
@@ -141,19 +141,19 @@ public class DragonEgg implements Listener {
                             player.getAttribute(Attribute.WAYPOINT_RECEIVE_RANGE);
 
                     if (transmit != null) {
-                        transmit.setBaseValue(6_000_000.0);
+                        transmit.setBaseValue(6_000_000.0); // everyone transmits
                     }
 
                     if (receive != null) {
-                        receive.setBaseValue(hasEgg ? 6_000_000.0 : 0.0);
+                        receive.setBaseValue(hasEgg ? 6_000_000.0 : 0.0); // only egg holders receive
                     }
 
                     if (hasEgg) {
                         player.getWorld().spawnParticle(
                                 Particle.PORTAL,
-                                player.getLocation().add(0, 1, 0),
-                                20,
-                                0.6, 0.8, 0.6,
+                                player.getLocation().add(0, 1.1, 0),
+                                35,
+                                0.8, 1.0, 0.8,
                                 0
                         );
                     }
@@ -165,7 +165,7 @@ public class DragonEgg implements Listener {
 
     private void spawnRing(Player player) {
 
-        int points = 120;
+        int points = 240;
         double y = player.getLocation().getY() + 1.0;
 
         for (int i = 0; i < points; i++) {
@@ -175,7 +175,14 @@ public class DragonEgg implements Listener {
             double z = player.getLocation().getZ() + RADIUS * Math.sin(angle);
 
             Location loc = new Location(player.getWorld(), x, y, z);
-            player.getWorld().spawnParticle(Particle.PORTAL, loc, 1);
+
+            player.getWorld().spawnParticle(
+                    Particle.PORTAL,
+                    loc,
+                    4,
+                    0.05, 0.05, 0.05,
+                    0
+            );
         }
     }
 
@@ -227,6 +234,7 @@ public class DragonEgg implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Right-click to reveal players in an 8 block radius");
         lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
+        lore.add(ChatColor.GRAY + "Gain heart on kill");
         lore.add(ChatColor.RED + "20 second cooldown");
 
         meta.setLore(lore);
