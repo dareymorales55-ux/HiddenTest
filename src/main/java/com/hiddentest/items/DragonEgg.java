@@ -44,7 +44,6 @@ public class DragonEgg implements Listener {
         ItemStack item = event.getItem();
         if (!isDragonEgg(item)) return;
 
-        // ❌ Prevent placing the egg
         event.setCancelled(true);
 
         Player player = event.getPlayer();
@@ -59,9 +58,10 @@ public class DragonEgg implements Listener {
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
         player.setCooldown(Material.DRAGON_EGG, COOLDOWN_TICKS);
 
+        // 🔥 UPDATED SOUND HERE
         player.getWorld().playSound(
                 player.getLocation(),
-                Sound.ENTITY_ENDER_DRAGON_GROWL,
+                Sound.ENTITY_WITHER_SHOOT,
                 1f,
                 1f
         );
@@ -120,7 +120,6 @@ public class DragonEgg implements Listener {
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
 
-                    // Replace normal eggs with custom egg
                     for (int i = 0; i < player.getInventory().getSize(); i++) {
 
                         ItemStack item = player.getInventory().getItem(i);
@@ -133,7 +132,6 @@ public class DragonEgg implements Listener {
 
                     boolean hasEgg = hasDragonEgg(player);
 
-                    // 🔥 Locator Bar Fix
                     AttributeInstance transmit =
                             player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
 
@@ -141,11 +139,11 @@ public class DragonEgg implements Listener {
                             player.getAttribute(Attribute.WAYPOINT_RECEIVE_RANGE);
 
                     if (transmit != null) {
-                        transmit.setBaseValue(6_000_000.0); // everyone transmits
+                        transmit.setBaseValue(6_000_000.0);
                     }
 
                     if (receive != null) {
-                        receive.setBaseValue(hasEgg ? 6_000_000.0 : 0.0); // only egg holders receive
+                        receive.setBaseValue(hasEgg ? 6_000_000.0 : 0.0);
                     }
 
                     if (hasEgg) {
