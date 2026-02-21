@@ -13,12 +13,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ShadowStar implements Listener {
 
     private final HiddenTest plugin;
+
+    // 15 minutes in milliseconds
+    private static final long PROTECTION_TIME = 15 * 60 * 1000L;
+
+    // Protected players map
+    private static final Map<UUID, Long> protection = new HashMap<>();
 
     public ShadowStar(HiddenTest plugin) {
         this.plugin = plugin;
@@ -38,6 +43,7 @@ public class ShadowStar implements Listener {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
 
         // Consume item
         if (item.getAmount() > 1) {
@@ -46,15 +52,30 @@ public class ShadowStar implements Listener {
             player.getInventory().remove(item);
         }
 
-        // Hide player
+        // Remove reveal immediately
         RevealManager.hide(player);
+
+        // Apply protection
+        protection.put(uuid, System.currentTimeMillis() + PROTECTION_TIME);
 
         player.playSound(player.getLocation(),
                 Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE,
                 1f,
                 1f);
 
-        player.sendMessage(ChatColor.GRAY + "You have vanished into the shadows.");
+        player.sendMessage(ChatColor.GRAY + "You are protected from reveals for 15 minutes.");
+    }
+
+    public static boolean isProtected(Player player) {
+        Long expiry = protection.get(player.getUniqueId());
+        if (expiry == null) return false;
+
+        if (System.currentTimeMillis() > expiry) {
+            protection.remove(player.getUniqueId());
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isShadowStar(ItemStack item) {
@@ -81,8 +102,9 @@ public class ShadowStar implements Listener {
         meta.setDisplayName(ChatColor.GRAY.toString() + ChatColor.BOLD + "Shadow Star");
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Right-click to remove your reveal status");
-        lore.add(ChatColor.RED + "Consumed on use"); // 🔥 RED now
+        lore.add(ChatColor.GRAY + "Right-click to remove reveal");
+        lore.add(ChatColor.GRAY + "Grants 15 minutes of reveal immunity");
+        lore.add(ChatColor.RED + "Consumed on use");
 
         meta.setLore(lore);
         star.setItemMeta(meta);
