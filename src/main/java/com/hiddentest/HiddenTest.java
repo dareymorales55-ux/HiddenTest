@@ -2,9 +2,11 @@ package com.hiddentest;
 
 import com.hiddentest.commands.GiveCompassCommand;
 import com.hiddentest.commands.GiveBellCommand;
-import com.hiddentest.hearts.EggHeart; // ✅ ADD THIS
+import com.hiddentest.commands.GiveStarCommand;
+import com.hiddentest.hearts.EggHeart;
 import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
+import com.hiddentest.items.ShadowStar;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
 import com.hiddentest.reveal.RevealManager;
@@ -25,25 +27,22 @@ public final class HiddenTest extends JavaPlugin {
         // Hourly reveal system
         getServer().getPluginManager().registerEvents(new HourlyReveal(), this);
 
-        // 🔥 Detective Compass listener
+        // Items
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
-
-        // 🔔 Bell of Truth listener
         getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
-
-        // 🐉 Dragon Egg listener
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
+        getServer().getPluginManager().registerEvents(new ShadowStar(this), this); // ⭐ REGISTERED
 
-        // ❤️ Egg Heart system
-        getServer().getPluginManager().registerEvents(new EggHeart(this), this); // ✅ REGISTERED
+        // Hearts
+        getServer().getPluginManager().registerEvents(new EggHeart(this), this);
 
         // Commands
         getCommand("reveal").setExecutor(new RevealCommand());
         getCommand("hide").setExecutor(new RevealCommand());
         getCommand("givecompass").setExecutor(new GiveCompassCommand());
         getCommand("givebell").setExecutor(new GiveBellCommand(this));
+        getCommand("givestar").setExecutor(new GiveStarCommand()); // ⭐ REGISTERED
 
-        // Start RevealManager timer system
         RevealManager.init();
     }
 
