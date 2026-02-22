@@ -250,7 +250,7 @@ public class UnknownChicken implements Listener, CommandExecutor {
         DetectivesCompass compass = new DetectivesCompass((com.hiddentest.HiddenTest) plugin);
 
         world.dropItemNaturally(deathLoc, bell.createBell());
-        world.dropItemNaturally(deathLoc, compass.createCompass());
+        world.dropItemNaturally(deathLoc, compass.createDetectivesCompass());
 
         Bukkit.broadcastMessage(
                 ChatColor.GOLD + "" + ChatColor.BOLD +
