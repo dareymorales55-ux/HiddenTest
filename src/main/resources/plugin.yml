@@ -32,6 +32,11 @@ commands:
     usage: /summonchicken
     permission: hiddentest.summonchicken
 
+  givebook:
+    description: Gives the Book of Names
+    usage: /givebook
+    permission: hiddentest.givebook
+
 permissions:
   hiddentest.reveal:
     description: Allows revealing players
@@ -52,3 +57,7 @@ permissions:
   hiddentest.summonchicken:
     description: Allows summoning the Unknown Chicken
     default: op
+
+  hiddentest.givebook:
+    description: Allows giving the Book of Names
+    default: true
