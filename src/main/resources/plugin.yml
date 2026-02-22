@@ -27,6 +27,11 @@ commands:
     usage: /givebell <player>
     permission: hiddentest.givebell
 
+  summonchicken:
+    description: Summons the Unknown Chicken boss
+    usage: /summonchicken
+    permission: hiddentest.summonchicken
+
 permissions:
   hiddentest.reveal:
     description: Allows revealing players
@@ -42,4 +47,8 @@ permissions:
 
   hiddentest.givebell:
     description: Allows giving the Bell of Truth
+    default: op
+
+  hiddentest.summonchicken:
+    description: Allows summoning the Unknown Chicken
     default: op
