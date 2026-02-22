@@ -1,5 +1,6 @@
 package com.hiddentest.items;
 
+import com.hiddentest.HiddenTest;
 import com.hiddentest.reveal.RevealManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
