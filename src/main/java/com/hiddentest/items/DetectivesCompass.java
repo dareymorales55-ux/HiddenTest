@@ -26,7 +26,7 @@ public class DetectivesCompass implements Listener {
 
     private static final int COOLDOWN_SECONDS = 15 * 60;
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
-    private static final double MIN_TRACK_DISTANCE = 8.0;
+    private static final double MIN_TRACK_DISTANCE = 5.0; // CHANGED TO 5
 
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
@@ -44,9 +44,9 @@ public class DetectivesCompass implements Listener {
             meta.setDisplayName(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Detective’s Compass");
 
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Right-click to hunt a random player");
+            lore.add(ChatColor.GRAY + "Right-click to hunt a player");
             lore.add(ChatColor.GRAY + "Tracks target for 5 minutes");
-            lore.add(ChatColor.GRAY + "Does not track players within 8 blocks");
+            lore.add(ChatColor.GRAY + "Does not track players within 5 blocks");
             lore.add(ChatColor.RED + "Overworld only");
 
             meta.setLore(lore);
@@ -96,7 +96,6 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
-        // COOLDOWN CHECK
         long now = System.currentTimeMillis();
         if (cooldowns.containsKey(hunter.getUniqueId())) {
             long expires = cooldowns.get(hunter.getUniqueId());
@@ -128,7 +127,17 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
-        Player target = possibleTargets.get(new Random().nextInt(possibleTargets.size()));
+        // =========================
+        // PRIORITIZE CLOSER PLAYERS
+        // =========================
+
+        possibleTargets.sort(Comparator.comparingDouble(p ->
+                p.getLocation().distanceSquared(hunter.getLocation())
+        ));
+
+        // Pick randomly from closest 3 players (or less if not enough)
+        int pickRange = Math.min(3, possibleTargets.size());
+        Player target = possibleTargets.get(new Random().nextInt(pickRange));
 
         hunter.playSound(hunter.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
         target.playSound(target.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
@@ -141,7 +150,6 @@ public class DetectivesCompass implements Listener {
         long expireTime = now + (COOLDOWN_SECONDS * 1000L);
         cooldowns.put(hunter.getUniqueId(), expireTime);
 
-        // VISUAL ITEM COOLDOWN (ticks must be int)
         hunter.setCooldown(Material.COMPASS, COOLDOWN_SECONDS * 20);
 
         tracking.put(hunter.getUniqueId(), target.getUniqueId());
@@ -150,7 +158,7 @@ public class DetectivesCompass implements Listener {
     }
 
     // =========================
-    // TRACKING LOGIC (SMOOTH)
+    // TRACKING LOGIC
     // =========================
 
     private void startTracking(Player hunter, Player target) {
@@ -209,12 +217,8 @@ public class DetectivesCompass implements Listener {
                 }
             }
 
-        }.runTaskTimer(plugin, 0L, 2L); // smooth update
+        }.runTaskTimer(plugin, 0L, 2L);
     }
-
-    // =========================
-    // UTIL
-    // =========================
 
     private String getDirectionArrow(Player hunter, Player target) {
 
