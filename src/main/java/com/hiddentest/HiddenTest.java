@@ -5,9 +5,12 @@ import com.hiddentest.commands.GiveBellCommand;
 import com.hiddentest.hearts.EggHeart;
 import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
+import com.hiddentest.items.BellOfTruth;
+import com.hiddentest.mobs.UnknownChicken;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
 import com.hiddentest.reveal.RevealManager;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HiddenTest extends JavaPlugin {
@@ -16,29 +19,50 @@ public final class HiddenTest extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         instance = this;
 
-        // Core listeners
+        // =========================
+        // CORE LISTENERS
+        // =========================
         getServer().getPluginManager().registerEvents(new ProfileManager(), this);
         getServer().getPluginManager().registerEvents(new DeathListener(), this);
 
-        // Hourly reveal system
+        // =========================
+        // HOURLY REVEAL SYSTEM
+        // =========================
         getServer().getPluginManager().registerEvents(new HourlyReveal(), this);
 
-        // Items
+        // =========================
+        // ITEMS
+        // =========================
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
         getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
 
-        // Hearts
+        // =========================
+        // HEART SYSTEM
+        // =========================
         getServer().getPluginManager().registerEvents(new EggHeart(this), this);
 
-        // Commands
+        // =========================
+        // UNKNOWN CHICKEN BOSS
+        // =========================
+        UnknownChicken unknownChicken = new UnknownChicken(this);
+        getServer().getPluginManager().registerEvents(unknownChicken, this);
+        getCommand("summonchicken").setExecutor(unknownChicken);
+
+        // =========================
+        // COMMANDS
+        // =========================
         getCommand("reveal").setExecutor(new RevealCommand());
         getCommand("hide").setExecutor(new RevealCommand());
         getCommand("givecompass").setExecutor(new GiveCompassCommand());
         getCommand("givebell").setExecutor(new GiveBellCommand(this));
 
+        // =========================
+        // INIT REVEAL MANAGER
+        // =========================
         RevealManager.init();
     }
 
