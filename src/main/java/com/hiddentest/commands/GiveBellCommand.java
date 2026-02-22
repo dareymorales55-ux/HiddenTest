@@ -1,6 +1,6 @@
 package com.hiddentest.commands;
 
-import com.hiddentest.BellOfTruth;
+import com.hiddentest.items.BellOfTruth;
 import com.hiddentest.HiddenTest;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
