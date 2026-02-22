@@ -2,7 +2,6 @@ package com.hiddentest.reveal;
 
 import com.hiddentest.HiddenTest;
 import com.hiddentest.ProfileManager;
-import com.hiddentest.items.ShadowStar;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -40,11 +39,6 @@ public class RevealManager {
 
     // durationTicks (NOT milliseconds)
     public static void reveal(Player player, int durationTicks) {
-
-        // 🛑 BLOCK if Shadow Star protection is active
-        if (ShadowStar.isProtected(player)) {
-            return;
-        }
 
         ProfileManager.restore(player);
 
