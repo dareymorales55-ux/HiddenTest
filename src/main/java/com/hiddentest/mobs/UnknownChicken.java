@@ -48,7 +48,6 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
         World world = loc.getWorld();
 
-        // 🔊 Spawn sound (Ender Dragon growl)
         world.playSound(loc, Sound.ENTITY_ENDER_DRAGON_GROWL, 3f, 1f);
 
         Bukkit.broadcastMessage(
@@ -181,7 +180,7 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
                 if (tick % 300 == 0) {
                     chicken.addPotionEffect(new PotionEffect(
-                            PotionEffectType.HEAL,
+                            PotionEffectType.INSTANT_HEALTH,
                             1,
                             1
                     ));
@@ -241,15 +240,17 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
         event.getDrops().clear();
 
-        // 💥 Fake explosion (visual only)
         world.createExplosion(deathLoc, 0F, false, false);
-        world.spawnParticle(Particle.EXPLOSION_HUGE, deathLoc, 1);
+        world.spawnParticle(Particle.EXPLOSION, deathLoc, 1);
 
-        // 🔊 Respawn anchor charge sound
         world.playSound(deathLoc, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 2f, 1f);
 
-        world.dropItemNaturally(deathLoc, BellOfTruth.createBell());
-        world.dropItemNaturally(deathLoc, DetectivesCompass.createDetectivesCompass());
+        // ✅ Proper item creation
+        BellOfTruth bell = new BellOfTruth((com.hiddentest.HiddenTest) plugin);
+        DetectivesCompass compass = new DetectivesCompass((com.hiddentest.HiddenTest) plugin);
+
+        world.dropItemNaturally(deathLoc, bell.createBell());
+        world.dropItemNaturally(deathLoc, compass.createCompass());
 
         Bukkit.broadcastMessage(
                 ChatColor.GOLD + "" + ChatColor.BOLD +
