@@ -1,4 +1,4 @@
-package com.hiddentest;
+package com.hiddentest.items;
 
 import com.hiddentest.reveal.RevealManager;
 import org.bukkit.*;
