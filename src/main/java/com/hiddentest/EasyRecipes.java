@@ -86,9 +86,9 @@ public class EasyRecipes {
 
 
         // =========================
-        // APPLE (From Leaves + Redstone)
+        // APPLE (From Leaves + Redstone) - Gives 2 Apples
         // =========================
-        ItemStack apple = new ItemStack(Material.APPLE);
+        ItemStack apple = new ItemStack(Material.APPLE, 2);
 
         ShapedRecipe appleRecipe = new ShapedRecipe(
                 new NamespacedKey(plugin, "easy_apple"),
