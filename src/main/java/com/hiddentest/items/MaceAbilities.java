@@ -78,7 +78,7 @@ public class MaceAbilities implements Listener {
 
                     if (hasMace) {
 
-                        // Speed I
+                        // Speed I (refreshed every second)
                         player.addPotionEffect(
                                 new PotionEffect(PotionEffectType.SPEED, 40, 0, true, false)
                         );
@@ -94,7 +94,7 @@ public class MaceAbilities implements Listener {
                                 player.getLocation().add(0, 1, 0),
                                 8,
                                 0.4, 0.5, 0.4,
-                                new Particle.DustOptions(Color.BLUE, 1.2f)
+                                new Particle.DustOptions(Color.AQUA, 1.2f)
                         );
                     }
                 }
@@ -114,17 +114,13 @@ public class MaceAbilities implements Listener {
         ItemStack item = attacker.getInventory().getItemInMainHand();
         if (item == null || item.getType() != Material.MACE) return;
 
-        // Only real smash attacks (falling)
+        // Only trigger on real smash attacks (must be falling)
         if (attacker.getFallDistance() < 1.5) return;
 
-        // 🔥 Reveal victim using RevealManager
-        RevealManager.revealPlayer(victim);
+        // 🔥 Reveal victim for 3 seconds (60 ticks)
+        RevealManager.reveal(victim, 60);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            RevealManager.hidePlayer(victim);
-        }, 60L); // 3 seconds
-
-        // Slow Falling for 5 seconds
+        // Slow Falling for 5 seconds (100 ticks)
         victim.addPotionEffect(
                 new PotionEffect(PotionEffectType.SLOW_FALLING, 100, 0)
         );
