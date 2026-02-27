@@ -7,6 +7,7 @@ import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
 import com.hiddentest.items.BellOfTruth;
 import com.hiddentest.items.BookOfNames;
+import com.hiddentest.items.MaceAbilities; // ✅ Added
 import com.hiddentest.mobs.UnknownChicken;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
@@ -40,6 +41,7 @@ public final class HiddenTest extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
         getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
+        getServer().getPluginManager().registerEvents(new MaceAbilities(this), this); // ✅ Registered
 
         // =========================
         // HEART SYSTEM
