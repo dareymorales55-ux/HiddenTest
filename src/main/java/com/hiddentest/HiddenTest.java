@@ -60,7 +60,12 @@ public final class HiddenTest extends JavaPlugin {
         getCommand("hide").setExecutor(new RevealCommand());
         getCommand("givecompass").setExecutor(new GiveCompassCommand());
         getCommand("givebell").setExecutor(new GiveBellCommand(this));
-        getCommand("givebook").setExecutor(new BookOfNames()); // ✅ Added
+        getCommand("givebook").setExecutor(new BookOfNames());
+
+        // =========================
+        // EASY RECIPES
+        // =========================
+        new EasyRecipes(this);
 
         // =========================
         // INIT REVEAL MANAGER
