@@ -78,7 +78,7 @@ public class MaceAbilities implements Listener {
 
                     if (hasMace) {
 
-                        // Speed I (refreshed every second)
+                        // Speed I
                         player.addPotionEffect(
                                 new PotionEffect(PotionEffectType.SPEED, 40, 0, true, false)
                         );
@@ -88,11 +88,11 @@ public class MaceAbilities implements Listener {
                                 new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0, true, false)
                         );
 
-                        // Blue Dust Particles
+                        // AQUA Dust Particles (match Dragon Egg density)
                         player.getWorld().spawnParticle(
                                 Particle.DUST,
                                 player.getLocation().add(0, 1, 0),
-                                8,
+                                35, // same density as Dragon Egg passive
                                 0.4, 0.5, 0.4,
                                 new Particle.DustOptions(Color.AQUA, 1.2f)
                         );
@@ -114,13 +114,13 @@ public class MaceAbilities implements Listener {
         ItemStack item = attacker.getInventory().getItemInMainHand();
         if (item == null || item.getType() != Material.MACE) return;
 
-        // Only trigger on real smash attacks (must be falling)
+        // Only trigger on real smash attacks
         if (attacker.getFallDistance() < 1.5) return;
 
-        // 🔥 Reveal victim for 3 seconds (60 ticks)
+        // Reveal victim for 3 seconds
         RevealManager.reveal(victim, 60);
 
-        // Slow Falling for 5 seconds (100 ticks)
+        // Slow Falling for 5 seconds
         victim.addPotionEffect(
                 new PotionEffect(PotionEffectType.SLOW_FALLING, 100, 0)
         );
