@@ -88,13 +88,17 @@ public class MaceAbilities implements Listener {
                                 new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0, true, false)
                         );
 
-                        // AQUA Dust Particles (match Dragon Egg density)
+                        // Aqua -> Light Blue Transition Particles
                         player.getWorld().spawnParticle(
-                                Particle.DUST,
+                                Particle.DUST_COLOR_TRANSITION,
                                 player.getLocation().add(0, 1, 0),
-                                35, // same density as Dragon Egg passive
+                                35,
                                 0.4, 0.5, 0.4,
-                                new Particle.DustOptions(Color.AQUA, 1.2f)
+                                new Particle.DustTransition(
+                                        Color.AQUA,
+                                        Color.fromRGB(173, 216, 230), // light blue
+                                        1.2f
+                                )
                         );
                     }
                 }
