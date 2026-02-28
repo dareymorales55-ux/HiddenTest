@@ -4,6 +4,7 @@ import com.hiddentest.reveal.RevealManager;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class DeathListener implements Listener {
@@ -19,8 +21,11 @@ public class DeathListener implements Listener {
     public void onDeath(PlayerDeathEvent event) {
 
         Player victim = event.getEntity();
-        Player killer = victim.getKiller();
 
+        // HARD STOP if already processed
+        if (victim.hasMetadata("caught")) return;
+
+        Player killer = victim.getKiller();
         if (killer == null) return;
 
         String realVictimName = ProfileManager.getRealName(victim);
@@ -40,16 +45,38 @@ public class DeathListener implements Listener {
 
         if (!nameWeaponMatch && !victimIsRevealed) return;
 
-        // 🔥 Mark as caught so we suppress quit message
+        // =============================
+        // MARK AS CAUGHT (prevents double fire)
+        // =============================
         victim.setMetadata("caught",
                 new FixedMetadataValue(HiddenTest.getInstance(), true));
 
-        // Optional: clear reveal state for safety
+        // Clear reveal state
         RevealManager.hide(victim);
 
+        // =============================
+        // DROP REAL SKIN HEAD
+        // =============================
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+
+        if (skullMeta != null) {
+            skullMeta.setOwningPlayer(victim); // real skin
+            skullMeta.setDisplayName(ChatColor.RED + realVictimName + "'s Head");
+            head.setItemMeta(skullMeta);
+        }
+
+        victim.getWorld().dropItemNaturally(victim.getLocation(), head);
+
+        // =============================
+        // BROADCAST ONCE
+        // =============================
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
         Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
 
+        // =============================
+        // BAN + KICK
+        // =============================
         Bukkit.getBanList(BanList.Type.NAME).addBan(
                 realVictimName,
                 ChatColor.DARK_RED + "Your cover was blown.",
@@ -65,7 +92,6 @@ public class DeathListener implements Listener {
 
         Player player = event.getPlayer();
 
-        // Only suppress quit message if they were caught
         if (player.hasMetadata("caught")) {
             event.setQuitMessage(null);
             player.removeMetadata("caught", HiddenTest.getInstance());
