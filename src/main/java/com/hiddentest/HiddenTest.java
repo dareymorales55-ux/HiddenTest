@@ -12,7 +12,8 @@ import com.hiddentest.mobs.UnknownChicken;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
 import com.hiddentest.reveal.RevealManager;
-import com.hiddentest.world.EndLightning; // ✅ IMPORT ADDED
+import com.hiddentest.world.EndLightning;
+import com.hiddentest.world.EndReform; // ✅ IMPORT ADDED
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -76,9 +77,10 @@ public final class HiddenTest extends JavaPlugin {
         RevealManager.init();
 
         // =========================
-        // END LIGHTNING SYSTEM
+        // END SYSTEMS
         // =========================
-        new EndLightning(this); // ✅ STARTS THE 20s LIGHTNING TASK
+        new EndReform(this);   // ✅ ONE-TIME END TRANSFORMATION
+        new EndLightning(this); // ✅ REPEATING LIGHTNING EVERY 20s
     }
 
     public static HiddenTest getInstance() {
