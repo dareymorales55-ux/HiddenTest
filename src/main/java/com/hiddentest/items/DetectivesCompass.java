@@ -26,7 +26,7 @@ public class DetectivesCompass implements Listener {
 
     private static final int COOLDOWN_SECONDS = 15 * 60;
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
-    private static final double MIN_TRACK_DISTANCE = 5.0; // CHANGED TO 5
+    private static final double MIN_TRACK_DISTANCE = 5.0;
 
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
@@ -44,7 +44,7 @@ public class DetectivesCompass implements Listener {
             meta.setDisplayName(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Detective’s Compass");
 
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Right-click to hunt a player");
+            lore.add(ChatColor.GRAY + "Right-click to hunt one of the closest players");
             lore.add(ChatColor.GRAY + "Tracks target for 5 minutes");
             lore.add(ChatColor.GRAY + "Does not track players within 5 blocks");
             lore.add(ChatColor.RED + "Overworld only");
@@ -127,16 +127,15 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
-        // =========================
-        // PRIORITIZE CLOSER PLAYERS
-        // =========================
-
+        // 🎯 Sort by distance (closest first)
         possibleTargets.sort(Comparator.comparingDouble(p ->
                 p.getLocation().distanceSquared(hunter.getLocation())
         ));
 
-        // Pick randomly from closest 3 players (or less if not enough)
-        int pickRange = Math.min(3, possibleTargets.size());
+        // 👥 Take the 2 closest players (or less if not enough)
+        int pickRange = Math.min(2, possibleTargets.size());
+
+        // 🎲 Randomly pick one of those two
         Player target = possibleTargets.get(new Random().nextInt(pickRange));
 
         hunter.playSound(hunter.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
