@@ -22,8 +22,12 @@ public class DragonEgg implements Listener {
     private final HiddenTest plugin;
 
     private static final double RADIUS = 8.0;
-    private static final int REVEAL_DURATION = 5 * 20;
-    private static final int COOLDOWN_SECONDS = 20;
+
+    // 🔥 UPDATED REVEAL TIME (15 seconds)
+    private static final int REVEAL_DURATION = 15 * 20;
+
+    // 🔥 UPDATED COOLDOWN (40 seconds)
+    private static final int COOLDOWN_SECONDS = 40;
     private static final int COOLDOWN_TICKS = COOLDOWN_SECONDS * 20;
 
     private final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -58,7 +62,6 @@ public class DragonEgg implements Listener {
         cooldowns.put(uuid, System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
         player.setCooldown(Material.DRAGON_EGG, COOLDOWN_TICKS);
 
-        // 🔥 UPDATED SOUND HERE
         player.getWorld().playSound(
                 player.getLocation(),
                 Sound.ENTITY_WITHER_SHOOT,
@@ -231,9 +234,9 @@ public class DragonEgg implements Listener {
 
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Right-click to reveal players in an 8 block radius");
-        lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
+        lore.add(ChatColor.GRAY + "Reveal lasts 15 seconds"); // 🔥 UPDATED
         lore.add(ChatColor.GRAY + "Gain heart on kill");
-        lore.add(ChatColor.RED + "20 second cooldown");
+        lore.add(ChatColor.RED + "40 second cooldown"); // 🔥 UPDATED
 
         meta.setLore(lore);
 
