@@ -23,11 +23,11 @@ public class DragonEgg implements Listener {
 
     private static final double RADIUS = 8.0;
 
-    // 🔥 UPDATED REVEAL TIME (15 seconds)
+    // Reveal duration (15 seconds)
     private static final int REVEAL_DURATION = 15 * 20;
 
-    // 🔥 UPDATED COOLDOWN (40 seconds)
-    private static final int COOLDOWN_SECONDS = 40;
+    // Cooldown (1 minute)
+    private static final int COOLDOWN_SECONDS = 60;
     private static final int COOLDOWN_TICKS = COOLDOWN_SECONDS * 20;
 
     private final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -166,7 +166,7 @@ public class DragonEgg implements Listener {
 
     private void spawnRing(Player player) {
 
-        int points = 240;
+        int points = 720; // Much denser ring
         double y = player.getLocation().getY() + 1.0;
 
         for (int i = 0; i < points; i++) {
@@ -180,8 +180,8 @@ public class DragonEgg implements Listener {
             player.getWorld().spawnParticle(
                     Particle.PORTAL,
                     loc,
-                    4,
-                    0.05, 0.05, 0.05,
+                    6,
+                    0.03, 0.03, 0.03,
                     0
             );
         }
@@ -234,9 +234,9 @@ public class DragonEgg implements Listener {
 
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Right-click to reveal players in an 8 block radius");
-        lore.add(ChatColor.GRAY + "Reveal lasts 15 seconds"); // 🔥 UPDATED
+        lore.add(ChatColor.GRAY + "Reveal lasts 15 seconds");
         lore.add(ChatColor.GRAY + "Gain heart on kill");
-        lore.add(ChatColor.RED + "40 second cooldown"); // 🔥 UPDATED
+        lore.add(ChatColor.RED + "1 minute cooldown");
 
         meta.setLore(lore);
 
