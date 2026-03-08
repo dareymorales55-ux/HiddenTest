@@ -211,7 +211,7 @@ public class UnknownChicken implements Listener, CommandExecutor {
     }
 
     // =========================
-    // REVEAL ATTACKER
+    // REVEAL ATTACKER (FIXED)
     // =========================
 
     @EventHandler
@@ -221,7 +221,11 @@ public class UnknownChicken implements Listener, CommandExecutor {
         if (!chicken.getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) return;
 
         if (event.getDamager() instanceof Player player) {
-            RevealManager.reveal(player, 60);
+
+            // Only reveal if the player is NOT already revealed
+            if (!RevealManager.isRevealed(player)) {
+                RevealManager.reveal(player, 60);
+            }
         }
     }
 
@@ -245,7 +249,6 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
         world.playSound(deathLoc, Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 2f, 1f);
 
-        // ✅ Proper item creation
         BellOfTruth bell = new BellOfTruth((com.hiddentest.HiddenTest) plugin);
         DetectivesCompass compass = new DetectivesCompass((com.hiddentest.HiddenTest) plugin);
 
