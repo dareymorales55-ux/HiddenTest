@@ -3,7 +3,6 @@ package com.hiddentest.world;
 import com.hiddentest.HiddenTest;
 import org.bukkit.*;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +45,10 @@ public class EndLightning {
                     double x = random.nextDouble() * (RADIUS * 2) - RADIUS;
                     double z = random.nextDouble() * (RADIUS * 2) - RADIUS;
 
-                    Location loc = new Location(endWorld, x, 0, z);
+                    // ensure inside 200 block circle from 0,0
+                    if ((x * x + z * z) > (RADIUS * RADIUS)) continue;
 
-                    // Make sure inside circle radius
-                    if (loc.distanceSquared(new Location(endWorld, 0, 0, 0)) > RADIUS * RADIUS)
-                        continue;
+                    Location loc = new Location(endWorld, x, 0, z);
 
                     int y = endWorld.getHighestBlockYAt(loc);
                     loc.setY(y);
@@ -74,7 +72,7 @@ public class EndLightning {
                 }
             }
 
-        }.runTaskTimer(plugin, 0L, 20L * 20); // every 20 seconds
+        }.runTaskTimer(plugin, 0L, 20L * 15); // every 15 seconds
     }
 
     private void spawnLightningEffect(Location loc) {
@@ -87,8 +85,8 @@ public class EndLightning {
 
         // 🌸 Pink -> Purple transition
         Particle.DustTransition dust = new Particle.DustTransition(
-                Color.fromRGB(255, 105, 180), // pink
-                Color.fromRGB(160, 32, 240),  // purple
+                Color.fromRGB(255, 105, 180),
+                Color.fromRGB(160, 32, 240),
                 1.5f
         );
 
@@ -99,7 +97,7 @@ public class EndLightning {
             @Override
             public void run() {
 
-                if (ticks >= 60) { // 3 seconds
+                if (ticks >= 60) {
                     cancel();
                     return;
                 }
