@@ -78,32 +78,34 @@ public class MaceAbilities implements Listener {
 
                     if (hasMace) {
 
-                        // Speed I
+                        // Speed I (longer so it never flickers)
                         player.addPotionEffect(
-                                new PotionEffect(PotionEffectType.SPEED, 40, 0, true, false)
+                                new PotionEffect(PotionEffectType.SPEED, 60, 0, true, false)
                         );
 
                         // Fire Resistance
                         player.addPotionEffect(
-                                new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0, true, false)
+                                new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60, 0, true, false)
                         );
 
-                        // Aqua -> Light Blue Transition Particles
+                        // Smooth constant particles (like Dragon Egg)
+                        Location loc = player.getLocation().add(0, 1.0, 0);
+
                         player.getWorld().spawnParticle(
                                 Particle.DUST_COLOR_TRANSITION,
-                                player.getLocation().add(0, 1, 0),
-                                35,
-                                0.4, 0.5, 0.4,
+                                loc,
+                                3,
+                                0.35, 0.5, 0.35,
                                 new Particle.DustTransition(
                                         Color.AQUA,
-                                        Color.fromRGB(173, 216, 230), // light blue
-                                        1.2f
+                                        Color.fromRGB(173, 216, 230),
+                                        1.1f
                                 )
                         );
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0L, 20L);
+        }.runTaskTimer(plugin, 0L, 1L); // run every tick for smooth particles
     }
 
     // =========================
