@@ -3,7 +3,6 @@ package com.hiddentest.items;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.Text;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import org.bukkit.ChatColor;
@@ -75,7 +74,7 @@ public class BookOfNames implements CommandExecutor {
             TextComponent line = new TextComponent("- " + name + "\n");
             line.setColor(net.md_5.bungee.api.ChatColor.BLACK);
 
-            // Copy name to clipboard
+            // Click to copy
             line.setClickEvent(new ClickEvent(
                     ClickEvent.Action.COPY_TO_CLIPBOARD,
                     name
@@ -84,7 +83,7 @@ public class BookOfNames implements CommandExecutor {
             // Hover text
             line.setHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
-                    new Text("Click to copy player name")
+                    new BaseComponent[]{ new TextComponent("Click to copy player name") }
             ));
 
             currentPage.add(line);
