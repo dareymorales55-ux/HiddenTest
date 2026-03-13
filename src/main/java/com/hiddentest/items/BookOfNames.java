@@ -1,6 +1,8 @@
 package com.hiddentest.items;
 
-import org.bukkit.Bukkit;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -10,9 +12,36 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BookOfNames implements CommandExecutor {
+
+    private static final String[] NAMES = {
+            "Amanjamin",
+            "vlgu",
+            "hypvrion",
+            "YTOnyxx",
+            "BTLXMAS",
+            "Astrosss_",
+            "Darkisbadwew",
+            "_DeejayAlt_",
+            "CoolFighter_",
+            "XfadezX",
+            "Jaampss",
+            "mchinMC",
+            "kieranifm",
+            "Nerd_456",
+            "NorSpear",
+            "Bladescape",
+            "Reddogs_MC",
+            "roboiz123",
+            "Shadowbanning",
+            "Tickle_Truffy",
+            "Vashblade_",
+            "r0gue8",
+            "itzmeefrfr"
+    };
 
     public static ItemStack createBook() {
 
@@ -22,32 +51,50 @@ public class BookOfNames implements CommandExecutor {
         meta.setTitle(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Book of Names");
         meta.setAuthor("anonymous");
 
-        String page1 =
-                ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + ChatColor.UNDERLINE +
-                        "Book of Names\n\n" +
-                ChatColor.BLACK +
-                        "- Amanjamin\n" +
-                        "- vlgu\n" +
-                        "- YTOnyxx\n" +
-                        "- BTLXMAS\n" +
-                        "- CNK_Frags\n" +
-                        "- Astrosss_\n" +
-                        "- Darkisbadwew\n" +
-                        "- _DeejayAlt_\n" +
-                        "- CoolFighter_\n" +
-                        "- XfadezX\n" +
-                        "- Jaampss\n" +
-                        "- kieranifm\n" +
-                        "- NorSpear\n" +
-                        "- Bladescape\n" +
-                        "- Reddogs_MC\n" +
-                        "- Shadowbanning\n" +
-                        "- Vashblade_\n" +
-                        "- r0gue8";
+        List<TextComponent> currentPage = new ArrayList<>();
+        List<TextComponent[]> pages = new ArrayList<>();
 
-        meta.setPages(Arrays.asList(page1));
+        // Header
+        TextComponent header = new TextComponent("Book of Names\n\n");
+        header.setColor(net.md_5.bungee.api.ChatColor.LIGHT_PURPLE);
+        header.setBold(true);
+        header.setUnderlined(true);
 
+        TextComponent instruction = new TextComponent("Click a name to copy\n\n");
+        instruction.setColor(net.md_5.bungee.api.ChatColor.GRAY);
+
+        currentPage.add(header);
+        currentPage.add(instruction);
+
+        int lineCount = 3;
+
+        for (String name : NAMES) {
+
+            TextComponent line = new TextComponent("- " + name + "\n");
+            line.setColor(net.md_5.bungee.api.ChatColor.BLACK);
+
+            line.setClickEvent(new ClickEvent(
+                    ClickEvent.Action.COPY_TO_CLIPBOARD,
+                    name
+            ));
+
+            currentPage.add(line);
+            lineCount++;
+
+            if (lineCount >= 13) {
+                pages.add(currentPage.toArray(new TextComponent[0]));
+                currentPage = new ArrayList<>();
+                lineCount = 0;
+            }
+        }
+
+        if (!currentPage.isEmpty()) {
+            pages.add(currentPage.toArray(new TextComponent[0]));
+        }
+
+        meta.spigot().setPages(pages);
         book.setItemMeta(meta);
+
         return book;
     }
 
