@@ -36,8 +36,11 @@ public class DeathListener implements Listener {
         if (weapon != null && weapon.hasItemMeta()) {
             ItemMeta meta = weapon.getItemMeta();
             if (meta != null && meta.hasDisplayName()) {
+
                 String weaponName = ChatColor.stripColor(meta.getDisplayName());
-                nameWeaponMatch = weaponName.equals(realVictimName);
+
+                // CASE INSENSITIVE COMPARISON
+                nameWeaponMatch = weaponName.equalsIgnoreCase(realVictimName);
             }
         }
 
