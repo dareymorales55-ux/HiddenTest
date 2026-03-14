@@ -42,7 +42,8 @@ public class BookOfNames implements CommandExecutor {
             "Tickle_Truffy",
             "Vashblade_",
             "r0gue8",
-            "itzmeefrfr"
+            "itzmeefrfr",
+            "Theaaveragesir"
     };
 
     public static ItemStack createBook() {
