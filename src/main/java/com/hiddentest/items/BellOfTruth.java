@@ -28,10 +28,10 @@ public class BellOfTruth implements Listener {
 
     private static final double RADIUS = 15.0;
 
-    // ✅ USE TICKS (15 minutes)
-    private static final int REVEAL_DURATION = 15 * 60 * 20; // 18,000 ticks
+    // 15 minutes
+    private static final int REVEAL_DURATION = 15 * 60 * 20;
 
-    private static final int COOLDOWN_SECONDS = 300; // 5 minutes
+    private static final int COOLDOWN_SECONDS = 300;
 
     public BellOfTruth(HiddenTest plugin) {
         this.plugin = plugin;
@@ -126,21 +126,21 @@ public class BellOfTruth implements Listener {
         Location center = block.getLocation().add(0.5, 0.5, 0.5);
 
         spawnParticles(center);
-        revealNearby(center);
+        revealNearby(center, player);
     }
 
     /* =========================
        REVEAL
        ========================= */
 
-    private void revealNearby(Location center) {
+    private void revealNearby(Location center, Player ringer) {
 
         for (Player target : Bukkit.getOnlinePlayers()) {
 
+            if (target.equals(ringer)) continue;
             if (!target.getWorld().equals(center.getWorld())) continue;
             if (target.getLocation().distance(center) > RADIUS) continue;
 
-            // ✅ NOW CORRECT (ticks)
             RevealManager.reveal(target, REVEAL_DURATION);
         }
     }
@@ -230,7 +230,7 @@ public class BellOfTruth implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
-        lore.add(ChatColor.RED + "Reveals the ringer");
+        lore.add(ChatColor.RED + "Does not reveal the ringer");
 
         meta.setLore(lore);
 
