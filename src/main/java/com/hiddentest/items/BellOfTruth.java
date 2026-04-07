@@ -28,10 +28,11 @@ public class BellOfTruth implements Listener {
 
     private static final double RADIUS = 15.0;
 
-    // 15 minutes
-    private static final int REVEAL_DURATION = 15 * 60 * 20;
+    // 5 seconds
+    private static final int REVEAL_DURATION = 5 * 20;
 
-    private static final int COOLDOWN_SECONDS = 300;
+    // 2 minutes
+    private static final int COOLDOWN_SECONDS = 120;
 
     public BellOfTruth(HiddenTest plugin) {
         this.plugin = plugin;
@@ -230,6 +231,7 @@ public class BellOfTruth implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
+        lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
         lore.add(ChatColor.RED + "Does not reveal the ringer");
 
         meta.setLore(lore);
