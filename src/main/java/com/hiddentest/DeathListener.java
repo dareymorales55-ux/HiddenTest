@@ -5,6 +5,7 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +17,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class DeathListener implements Listener {
+
+    // Hex color #630000
+    private static final String CAUGHT_COLOR = ChatColor.of("#630000").toString();
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
@@ -64,7 +68,7 @@ public class DeathListener implements Listener {
         SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
 
         if (skullMeta != null) {
-            skullMeta.setOwningPlayer(victim); // real skin
+            skullMeta.setOwningPlayer(victim);
             skullMeta.setDisplayName(ChatColor.RED + realVictimName + "'s Head");
             head.setItemMeta(skullMeta);
         }
@@ -72,22 +76,34 @@ public class DeathListener implements Listener {
         victim.getWorld().dropItemNaturally(victim.getLocation(), head);
 
         // =============================
-        // BROADCAST ONCE
+        // BROADCAST
         // =============================
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
-        Bukkit.broadcastMessage(ChatColor.RED + realVictimName + " has been caught.");
+        Bukkit.broadcastMessage(CAUGHT_COLOR + realVictimName + " has been caught.");
+
+        // =============================
+        // GLOBAL WITHER SOUND
+        // =============================
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.playSound(
+                    online.getLocation(),
+                    Sound.ENTITY_WITHER_SPAWN,
+                    1.5f,
+                    1.0f
+            );
+        }
 
         // =============================
         // BAN + KICK
         // =============================
         Bukkit.getBanList(BanList.Type.NAME).addBan(
                 realVictimName,
-                ChatColor.DARK_RED + "Your cover was blown.",
+                CAUGHT_COLOR + "You have been caught.",
                 null,
                 null
         );
 
-        victim.kickPlayer(ChatColor.DARK_RED + "Your cover was blown.");
+        victim.kickPlayer(CAUGHT_COLOR + "You have been caught.");
     }
 
     @EventHandler
