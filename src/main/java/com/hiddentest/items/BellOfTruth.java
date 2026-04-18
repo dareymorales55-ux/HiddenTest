@@ -12,8 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,6 +36,38 @@ public class BellOfTruth implements Listener {
     public BellOfTruth(HiddenTest plugin) {
         this.plugin = plugin;
         this.bellKey = new NamespacedKey(plugin, "bell_of_truth");
+
+        registerRecipe();
+    }
+
+    /* =========================
+       RECIPE (FIXED)
+       ========================= */
+
+    private void registerRecipe() {
+
+        NamespacedKey key = new NamespacedKey(plugin, "bell_of_truth");
+
+        ShapedRecipe recipe = new ShapedRecipe(key, createBell());
+
+        recipe.shape(
+                "BAB",
+                "GCG",
+                "AGA"
+        );
+
+        recipe.setIngredient('B', Material.BLAZE_ROD);
+        recipe.setIngredient('A', Material.AMETHYST_SHARD);
+        recipe.setIngredient('G', Material.GOLD_INGOT);
+
+        // ✅ ONLY accept your custom Detective's Compass
+        recipe.setIngredient('C',
+                new RecipeChoice.ExactChoice(
+                        DetectivesCompass.createDetectivesCompass()
+                )
+        );
+
+        Bukkit.addRecipe(recipe);
     }
 
     /* =========================
@@ -130,9 +161,7 @@ public class BellOfTruth implements Listener {
         revealNearby(center, player);
     }
 
-    /* =========================
-       REVEAL
-       ========================= */
+    /* ========================= */
 
     private void revealNearby(Location center, Player ringer) {
 
@@ -146,9 +175,7 @@ public class BellOfTruth implements Listener {
         }
     }
 
-    /* =========================
-       PARTICLES
-       ========================= */
+    /* ========================= */
 
     private void spawnParticles(Location center) {
 
@@ -212,14 +239,10 @@ public class BellOfTruth implements Listener {
     }
 
     private String formatTime(int seconds) {
-        int minutes = seconds / 60;
-        int secs = seconds % 60;
-        return String.format("%02d:%02d", minutes, secs);
+        return String.format("%02d:%02d", seconds / 60, seconds % 60);
     }
 
-    /* =========================
-       CREATE ITEM
-       ========================= */
+    /* ========================= */
 
     public ItemStack createBell() {
 
