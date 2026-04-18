@@ -11,8 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,8 +27,12 @@ public class DetectivesCompass implements Listener {
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
     private static final double MIN_TRACK_DISTANCE = 5.0;
 
+    // HEX COLOR
+    private static final String COLOR = ChatColor.of("#093F42").toString();
+
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
+        registerRecipe(); // ✅ register recipe on load
     }
 
     // =========================
@@ -37,11 +40,11 @@ public class DetectivesCompass implements Listener {
     // =========================
 
     public static ItemStack createDetectivesCompass() {
-        ItemStack item = new ItemStack(Material.COMPASS);
+        ItemStack item = new ItemStack(Material.RECOVERY_COMPASS);
         ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
-            meta.setDisplayName(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Detective’s Compass");
+            meta.setDisplayName(COLOR + "" + ChatColor.BOLD + "Detective’s Compass");
 
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Right-click to hunt one of the closest players");
@@ -66,12 +69,36 @@ public class DetectivesCompass implements Listener {
     }
 
     private boolean isDetectivesCompass(ItemStack item) {
-        if (item == null || item.getType() != Material.COMPASS) return false;
+        if (item == null || item.getType() != Material.RECOVERY_COMPASS) return false;
         if (!item.hasItemMeta()) return false;
         if (!item.getItemMeta().hasDisplayName()) return false;
 
         return item.getItemMeta().getDisplayName()
-                .equals(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Detective’s Compass");
+                .equals(COLOR + "" + ChatColor.BOLD + "Detective’s Compass");
+    }
+
+    // =========================
+    // RECIPE
+    // =========================
+
+    private void registerRecipe() {
+
+        NamespacedKey key = new NamespacedKey(plugin, "detectives_compass");
+
+        ShapedRecipe recipe = new ShapedRecipe(key, createDetectivesCompass());
+
+        recipe.shape(
+                "BNB",
+                "DRB",
+                "BNB"
+        );
+
+        recipe.setIngredient('B', Material.BLAZE_ROD);
+        recipe.setIngredient('N', Material.NETHERITE_SCRAP);
+        recipe.setIngredient('D', Material.DIAMOND);
+        recipe.setIngredient('R', Material.RECOVERY_COMPASS);
+
+        Bukkit.addRecipe(recipe);
     }
 
     // =========================
@@ -127,15 +154,11 @@ public class DetectivesCompass implements Listener {
             return;
         }
 
-        // 🎯 Sort by distance (closest first)
         possibleTargets.sort(Comparator.comparingDouble(p ->
                 p.getLocation().distanceSquared(hunter.getLocation())
         ));
 
-        // 👥 Take the 2 closest players (or less if not enough)
         int pickRange = Math.min(2, possibleTargets.size());
-
-        // 🎲 Randomly pick one of those two
         Player target = possibleTargets.get(new Random().nextInt(pickRange));
 
         hunter.playSound(hunter.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 1f, 1f);
@@ -143,13 +166,13 @@ public class DetectivesCompass implements Listener {
 
         String realName = ProfileManager.getRealName(target);
 
-        hunter.sendMessage(ChatColor.DARK_PURPLE + "You are hunting: " + ChatColor.WHITE + realName);
+        hunter.sendMessage(COLOR + "You are hunting: " + ChatColor.WHITE + realName);
         target.sendMessage(ChatColor.DARK_RED + "You are being hunted.");
 
         long expireTime = now + (COOLDOWN_SECONDS * 1000L);
         cooldowns.put(hunter.getUniqueId(), expireTime);
 
-        hunter.setCooldown(Material.COMPASS, COOLDOWN_SECONDS * 20);
+        hunter.setCooldown(Material.RECOVERY_COMPASS, COOLDOWN_SECONDS * 20);
 
         tracking.put(hunter.getUniqueId(), target.getUniqueId());
 
