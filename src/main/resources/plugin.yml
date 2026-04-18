@@ -37,6 +37,12 @@ commands:
     usage: /givebook
     permission: hiddentest.givebook
 
+  # ✅ NEW COMMAND
+  serverstart:
+    description: Starts the event sequence
+    usage: /serverstart
+    permission: hiddentest.serverstart
+
 permissions:
   hiddentest.reveal:
     description: Allows revealing players
@@ -61,3 +67,8 @@ permissions:
   hiddentest.givebook:
     description: Allows giving the Book of Names
     default: true
+
+  # ✅ NEW PERMISSION
+  hiddentest.serverstart:
+    description: Allows starting the server event
+    default: op
