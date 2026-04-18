@@ -1,11 +1,18 @@
 package com.hiddentest.items;
 
-import org.bukkit.Registry;
+import net.md_5.bungee.api.ChatColor; // ✅ FIXED IMPORT
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
+
 import com.hiddentest.HiddenTest;
 import com.hiddentest.ProfileManager;
-import org.bukkit.*;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,12 +34,12 @@ public class DetectivesCompass implements Listener {
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
     private static final double MIN_TRACK_DISTANCE = 5.0;
 
-    // HEX COLOR
+    // ✅ HEX COLOR (NOW WORKS)
     private static final String COLOR = ChatColor.of("#093F42").toString();
 
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
-        registerRecipe(); // ✅ register recipe on load
+        registerRecipe();
     }
 
     // =========================
