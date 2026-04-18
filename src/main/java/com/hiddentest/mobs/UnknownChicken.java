@@ -74,8 +74,9 @@ public class UnknownChicken implements Listener, CommandExecutor {
         chicken.setRemoveWhenFarAway(false);
         chicken.setAdult();
 
-        chicken.getAttribute(Attribute.MAX_HEALTH).setBaseValue(300.0);
-        chicken.setHealth(300.0);
+        // ✅ UPDATED HEALTH (+100)
+        chicken.getAttribute(Attribute.MAX_HEALTH).setBaseValue(400.0);
+        chicken.setHealth(400.0);
 
         chicken.getAttribute(Attribute.SCALE).setBaseValue(10.0);
 
@@ -149,6 +150,7 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
                 tick++;
 
+                // Particle aura
                 chicken.getWorld().spawnParticle(
                         Particle.DUST,
                         chicken.getLocation().add(0, 1, 0),
@@ -157,27 +159,21 @@ public class UnknownChicken implements Listener, CommandExecutor {
                         new Particle.DustOptions(Color.YELLOW, 1)
                 );
 
+                // Lightning
                 if (tick % 100 == 0) {
                     strikeRandomLightning(chicken);
                 }
 
-                if (tick % 200 == 0) {
-
-                    chicken.addPotionEffect(new PotionEffect(
-                            PotionEffectType.INVISIBILITY,
-                            100,
-                            0,
-                            false,
-                            false
-                    ));
-
+                // AoE damage every 5s
+                if (tick % 100 == 0) {
                     for (Player p : chicken.getWorld().getPlayers()) {
-                        if (p.getLocation().distance(chicken.getLocation()) <= 8) {
-                            p.damage(6.0);
+                        if (p.getLocation().distance(chicken.getLocation()) <= 10) {
+                            p.damage(6.0); // 3 hearts
                         }
                     }
                 }
 
+                // Healing
                 if (tick % 300 == 0) {
                     chicken.addPotionEffect(new PotionEffect(
                             PotionEffectType.INSTANT_HEALTH,
@@ -211,7 +207,7 @@ public class UnknownChicken implements Listener, CommandExecutor {
     }
 
     // =========================
-    // REVEAL ATTACKER (FIXED)
+    // REVEAL ATTACKER
     // =========================
 
     @EventHandler
@@ -222,9 +218,8 @@ public class UnknownChicken implements Listener, CommandExecutor {
 
         if (event.getDamager() instanceof Player player) {
 
-            // Only reveal if the player is NOT already revealed
             if (!RevealManager.isRevealed(player)) {
-                RevealManager.reveal(player, 60);
+                RevealManager.reveal(player, 200); // 10 seconds
             }
         }
     }
