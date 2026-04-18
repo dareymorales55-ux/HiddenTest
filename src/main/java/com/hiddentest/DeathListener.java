@@ -1,14 +1,16 @@
 package com.hiddentest;
 
 import com.hiddentest.reveal.RevealManager;
+import net.md_5.bungee.api.ChatColor; // ✅ FIXED IMPORT
+
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +20,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public class DeathListener implements Listener {
 
-    // Hex color #630000
+    // ✅ HEX COLOR WORKS NOW
     private static final String CAUGHT_COLOR = ChatColor.of("#630000").toString();
 
     @EventHandler
@@ -26,43 +28,72 @@ public class DeathListener implements Listener {
 
         Player victim = event.getEntity();
 
-        // HARD STOP if already processed
         if (victim.hasMetadata("caught")) return;
-
-        Player killer = victim.getKiller();
-        if (killer == null) return;
 
         String realVictimName = ProfileManager.getRealName(victim);
 
+        // =============================
+        // DETERMINE IF PLAYER-RELATED DEATH
+        // =============================
+
+        Player killer = victim.getKiller();
+        boolean playerRelated = false;
+
+        if (killer != null) {
+            playerRelated = true;
+        } else {
+            EntityDamageEvent lastDamage = victim.getLastDamageCause();
+
+            if (lastDamage instanceof EntityDamageEvent) {
+                switch (lastDamage.getCause()) {
+
+                    // indirect player-caused deaths
+                    case FIRE:
+                    case FIRE_TICK:
+                    case LAVA:
+                    case FALL:
+                    case ENTITY_EXPLOSION:
+                    case BLOCK_EXPLOSION:
+                    case PROJECTILE:
+                        playerRelated = true;
+                        break;
+                }
+            }
+        }
+
+        // =============================
+        // NAME WEAPON CHECK
+        // =============================
+
         boolean nameWeaponMatch = false;
 
-        ItemStack weapon = killer.getInventory().getItemInMainHand();
-        if (weapon != null && weapon.hasItemMeta()) {
-            ItemMeta meta = weapon.getItemMeta();
-            if (meta != null && meta.hasDisplayName()) {
+        if (killer != null) {
+            ItemStack weapon = killer.getInventory().getItemInMainHand();
 
-                String weaponName = ChatColor.stripColor(meta.getDisplayName());
+            if (weapon != null && weapon.hasItemMeta()) {
+                ItemMeta meta = weapon.getItemMeta();
 
-                // CASE INSENSITIVE COMPARISON
-                nameWeaponMatch = weaponName.equalsIgnoreCase(realVictimName);
+                if (meta != null && meta.hasDisplayName()) {
+                    String weaponName = ChatColor.stripColor(meta.getDisplayName());
+                    nameWeaponMatch = weaponName.equalsIgnoreCase(realVictimName);
+                }
             }
         }
 
         boolean victimIsRevealed = RevealManager.isRevealed(victim);
 
-        if (!nameWeaponMatch && !victimIsRevealed) return;
+        if (!nameWeaponMatch && !(victimIsRevealed && playerRelated)) return;
 
         // =============================
-        // MARK AS CAUGHT (prevents double fire)
+        // MARK CAUGHT
         // =============================
         victim.setMetadata("caught",
                 new FixedMetadataValue(HiddenTest.getInstance(), true));
 
-        // Clear reveal state
         RevealManager.hide(victim);
 
         // =============================
-        // DROP REAL SKIN HEAD
+        // DROP HEAD
         // =============================
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
