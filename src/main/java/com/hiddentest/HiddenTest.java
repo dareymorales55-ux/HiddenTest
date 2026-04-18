@@ -7,13 +7,14 @@ import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
 import com.hiddentest.items.BellOfTruth;
 import com.hiddentest.items.BookOfNames;
-import com.hiddentest.items.MaceAbilities;
+// ❌ removed MaceAbilities import
 import com.hiddentest.mobs.UnknownChicken;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
 import com.hiddentest.reveal.RevealManager;
 import com.hiddentest.world.EndLightning;
-import com.hiddentest.world.EndReform; // ✅ IMPORT ADDED
+import com.hiddentest.world.EndReform;
+import com.hiddentest.world.ServerStart;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -43,7 +44,7 @@ public final class HiddenTest extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
         getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
-        getServer().getPluginManager().registerEvents(new MaceAbilities(this), this);
+        // ❌ removed MaceAbilities registration
 
         // =========================
         // HEART SYSTEM
@@ -66,6 +67,9 @@ public final class HiddenTest extends JavaPlugin {
         getCommand("givebell").setExecutor(new GiveBellCommand(this));
         getCommand("givebook").setExecutor(new BookOfNames());
 
+        // SERVER START COMMAND
+        getCommand("serverstart").setExecutor(new ServerStart(this));
+
         // =========================
         // EASY RECIPES
         // =========================
@@ -79,8 +83,8 @@ public final class HiddenTest extends JavaPlugin {
         // =========================
         // END SYSTEMS
         // =========================
-        new EndReform(this);   // ✅ ONE-TIME END TRANSFORMATION
-        new EndLightning(this); // ✅ REPEATING LIGHTNING EVERY 20s
+        new EndReform(this);
+        new EndLightning(this);
     }
 
     public static HiddenTest getInstance() {
