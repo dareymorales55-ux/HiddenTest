@@ -7,7 +7,6 @@ import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
 import com.hiddentest.items.BellOfTruth;
 import com.hiddentest.items.BookOfNames;
-// ❌ removed MaceAbilities import
 import com.hiddentest.mobs.UnknownChicken;
 import com.hiddentest.reveal.HourlyReveal;
 import com.hiddentest.reveal.RevealCommand;
@@ -15,6 +14,7 @@ import com.hiddentest.reveal.RevealManager;
 import com.hiddentest.world.EndLightning;
 import com.hiddentest.world.EndReform;
 import com.hiddentest.world.ServerStart;
+import com.hiddentest.world.RenameCapital; // ✅ ADDED
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -44,7 +44,6 @@ public final class HiddenTest extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
         getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
-        // ❌ removed MaceAbilities registration
 
         // =========================
         // HEART SYSTEM
@@ -69,6 +68,11 @@ public final class HiddenTest extends JavaPlugin {
 
         // SERVER START COMMAND
         getCommand("serverstart").setExecutor(new ServerStart(this));
+
+        // =========================
+        // WORLD / MECHANICS
+        // =========================
+        getServer().getPluginManager().registerEvents(new RenameCapital(), this); // ✅ ADDED
 
         // =========================
         // EASY RECIPES
