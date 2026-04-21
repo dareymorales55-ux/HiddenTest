@@ -34,8 +34,9 @@ public class DetectivesCompass implements Listener {
     private static final int TRACK_DURATION_SECONDS = 5 * 60;
     private static final double MIN_TRACK_DISTANCE = 5.0;
 
-    private static final String COLOR = ChatColor.of("#093F42").toString();
-    private static final String HUNT_COLOR = ChatColor.of("#23A9B8").toString(); // ✅ NEW COLOR
+    // ✅ FIXED HEX COLOR
+    private static final String COLOR = ChatColor.of("#127378").toString();
+    private static final String HUNT_COLOR = ChatColor.of("#23A9B8").toString();
 
     public DetectivesCompass(HiddenTest plugin) {
         this.plugin = plugin;
@@ -161,9 +162,8 @@ public class DetectivesCompass implements Listener {
 
         String realName = ProfileManager.getRealName(target);
 
-        // ✅ UPDATED MESSAGE COLOR
         hunter.sendMessage(HUNT_COLOR + "You are hunting: " + ChatColor.WHITE + realName);
-        target.sendMessage(ChatColor.DARK_RED + "You are being hunted.");
+        target.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "You are being hunted.");
 
         long expireTime = now + (COOLDOWN_SECONDS * 1000L);
         cooldowns.put(hunter.getUniqueId(), expireTime);
@@ -201,10 +201,21 @@ public class DetectivesCompass implements Listener {
                 double distance = hunter.getLocation().distance(target.getLocation());
                 String arrow = getDirectionArrow(hunter, target);
 
-                // ✅ ONLY TIMER COLOR CHANGED
-                hunter.sendActionBar(HUNT_COLOR + "" + ChatColor.BOLD +
-                        formatTime(secondsLeft) + ChatColor.GRAY +
-                        " | " + (int) distance + "m " + arrow);
+                // ✅ DISTANCE COLOR LOGIC
+                ChatColor distColor;
+                if (distance <= 15) {
+                    distColor = ChatColor.GREEN;
+                } else if (distance <= 24) {
+                    distColor = ChatColor.YELLOW;
+                } else {
+                    distColor = ChatColor.RED;
+                }
+
+                hunter.sendActionBar(
+                        HUNT_COLOR + "" + ChatColor.BOLD + formatTime(secondsLeft) +
+                        ChatColor.GRAY + " | " +
+                        distColor + (int) distance + "m " + arrow
+                );
 
                 target.sendActionBar(HUNT_COLOR + formatTime(secondsLeft));
 
