@@ -3,12 +3,13 @@ package com.hiddentest.reveal;
 import com.hiddentest.HiddenTest;
 import com.hiddentest.ProfileManager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,6 +19,9 @@ import java.util.UUID;
 public class RevealManager {
 
     private static final String TEAM_NAME = "revealed_team";
+
+    // ✅ YOUR CUSTOM HEX COLOR
+    private static final String REVEAL_COLOR = ChatColor.of("#7E0810").toString();
 
     // Remaining reveal time in TICKS (-1 = permanent)
     private static final Map<UUID, Integer> revealTimers = new HashMap<>();
@@ -37,7 +41,6 @@ public class RevealManager {
         reveal(player, -1);
     }
 
-    // durationTicks (NOT milliseconds)
     public static void reveal(Player player, int durationTicks) {
 
         ProfileManager.restore(player);
@@ -94,7 +97,9 @@ public class RevealManager {
 
         if (team == null) {
             team = scoreboard.registerNewTeam(TEAM_NAME);
-            team.setColor(ChatColor.DARK_RED);
+
+            // ✅ KEEP DEFAULT DARK RED GLOW COLOR
+            team.setColor(org.bukkit.ChatColor.DARK_RED);
         }
 
         team.addEntry(player.getName());
@@ -113,8 +118,10 @@ public class RevealManager {
         ));
 
         String realName = ProfileManager.getRealName(player);
-        player.setDisplayName(ChatColor.DARK_RED + realName);
-        player.setPlayerListName(ChatColor.DARK_RED + realName);
+
+        // ✅ APPLY CUSTOM HEX COLOR TO NAME + TAB
+        player.setDisplayName(REVEAL_COLOR + realName);
+        player.setPlayerListName(REVEAL_COLOR + realName);
     }
 
     private static void removeRevealVisuals(Player player) {
@@ -140,7 +147,7 @@ public class RevealManager {
             UUID uuid = entry.getKey();
             int remaining = entry.getValue();
 
-            if (remaining == -1) continue; // permanent
+            if (remaining == -1) continue;
 
             remaining--;
 
