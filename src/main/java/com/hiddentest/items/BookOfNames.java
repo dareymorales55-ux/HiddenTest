@@ -5,8 +5,10 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,50 +16,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class BookOfNames implements CommandExecutor {
-
-    private static final String[] NAMES = {
-            "Amanjamin",
-            "vlgu",
-            "hypvrion",
-            "YTOnyxx",
-            "BTLXMAS",
-            "Astrosss_",
-            "Darkisbadwew",
-            "_DeejayAlt_",
-            "CoolFighter_",
-            "XfadezX",
-            "Jaampss",
-            "mchinMC",
-            "kieranifm",
-            "Nerd_456",
-            "NorSpear",
-            "Bladescape",
-            "Reddogs_MC",
-            "roboiz123",
-            "Shadowbanning",
-            "Tickle_Truffy",
-            "Vashblade_",
-            "r0gue8",
-            "itzmeefrfr",
-            "Theaaveragesir"
-    };
 
     public static ItemStack createBook() {
 
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
 
-        meta.setTitle(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Book of Names");
-        meta.setAuthor("anonymous");
+        if (meta == null) return book;
+
+        // ✅ Title + Author
+        meta.setTitle(ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Player Names");
+        meta.setAuthor("Anonymous");
 
         List<BaseComponent[]> pages = new ArrayList<>();
         List<TextComponent> currentPage = new ArrayList<>();
 
-        TextComponent header = new TextComponent("Book of Names\n\n");
+        // Header
+        TextComponent header = new TextComponent("Player Names\n\n");
         header.setColor(net.md_5.bungee.api.ChatColor.LIGHT_PURPLE);
         header.setBold(true);
         header.setUnderlined(true);
@@ -70,7 +48,20 @@ public class BookOfNames implements CommandExecutor {
 
         int lineCount = 3;
 
-        for (String name : NAMES) {
+        // ✅ GET + SORT WHITELIST
+        List<String> names = new ArrayList<>();
+
+        for (OfflinePlayer p : Bukkit.getWhitelistedPlayers()) {
+            if (p.getName() != null) {
+                names.add(p.getName()); // keeps real capitalization
+            }
+        }
+
+        // Alphabetical (case-insensitive, keeps original caps)
+        names.sort(String.CASE_INSENSITIVE_ORDER);
+
+        // ✅ BUILD BOOK
+        for (String name : names) {
 
             TextComponent line = new TextComponent("- " + name + "\n");
             line.setColor(net.md_5.bungee.api.ChatColor.BLACK);
@@ -81,10 +72,12 @@ public class BookOfNames implements CommandExecutor {
                     name
             ));
 
-            // Hover text
+            // Hover
             line.setHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
-                    new BaseComponent[]{ new TextComponent("Click to copy player name") }
+                    new BaseComponent[]{
+                            new TextComponent("Click to copy player name")
+                    }
             ));
 
             currentPage.add(line);
@@ -119,7 +112,7 @@ public class BookOfNames implements CommandExecutor {
 
         player.sendMessage(
                 ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD +
-                        "Book of Names given."
+                        "Player Names book given."
         );
 
         return true;
