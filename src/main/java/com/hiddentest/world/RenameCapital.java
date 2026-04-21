@@ -9,8 +9,6 @@ import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Set;
-
 public class RenameCapital implements Listener {
 
     @EventHandler
@@ -24,21 +22,23 @@ public class RenameCapital implements Listener {
 
         String inputName = ChatColor.stripColor(meta.getDisplayName());
 
-        // ✅ Check WHITELIST instead of tablist
-        Set<OfflinePlayer> whitelist = Bukkit.getWhitelistedPlayers();
-
-        for (OfflinePlayer player : whitelist) {
+        for (OfflinePlayer player : Bukkit.getWhitelistedPlayers()) {
 
             String realName = player.getName();
             if (realName == null) continue;
 
             if (realName.equalsIgnoreCase(inputName)) {
 
-                // Fix capitalization
-                meta.setDisplayName(realName);
-                result.setItemMeta(meta);
+                // ✅ Clone result to prevent overwrite issues
+                ItemStack newResult = result.clone();
+                ItemMeta newMeta = newResult.getItemMeta();
 
-                event.setResult(result);
+                if (newMeta != null) {
+                    newMeta.setDisplayName(realName);
+                    newResult.setItemMeta(newMeta);
+                }
+
+                event.setResult(newResult);
                 return;
             }
         }
