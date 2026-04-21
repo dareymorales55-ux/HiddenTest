@@ -21,7 +21,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 public class DeathListener implements Listener {
 
     // ✅ HEX COLOR WORKS NOW
-    private static final String CAUGHT_COLOR = ChatColor.of("#630000").toString();
+    private static final String CAUGHT_COLOR = ChatColor.of("#D40000").toString();
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
