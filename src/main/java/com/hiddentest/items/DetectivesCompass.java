@@ -89,7 +89,7 @@ public class DetectivesCompass implements Listener {
 
         recipe.shape(
                 "BNB",
-                "DRB",
+                "DRD",
                 "BNB"
         );
 
