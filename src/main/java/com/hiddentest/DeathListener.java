@@ -1,7 +1,8 @@
 package com.hiddentest;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.hiddentest.reveal.RevealManager;
-import net.md_5.bungee.api.ChatColor; // ✅ FIXED IMPORT
+import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -20,34 +21,23 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public class DeathListener implements Listener {
 
-    // ✅ HEX COLOR WORKS NOW
     private static final String CAUGHT_COLOR = ChatColor.of("#B41926").toString();
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
 
         Player victim = event.getEntity();
-
         if (victim.hasMetadata("caught")) return;
 
         String realVictimName = ProfileManager.getRealName(victim);
 
-        // =============================
-        // DETERMINE IF PLAYER-RELATED DEATH
-        // =============================
-
         Player killer = victim.getKiller();
-        boolean playerRelated = false;
+        boolean playerRelated = killer != null;
 
-        if (killer != null) {
-            playerRelated = true;
-        } else {
+        if (!playerRelated) {
             EntityDamageEvent lastDamage = victim.getLastDamageCause();
-
-            if (lastDamage instanceof EntityDamageEvent) {
+            if (lastDamage != null) {
                 switch (lastDamage.getCause()) {
-
-                    // indirect player-caused deaths
                     case FIRE:
                     case FIRE_TICK:
                     case LAVA:
@@ -61,18 +51,12 @@ public class DeathListener implements Listener {
             }
         }
 
-        // =============================
-        // NAME WEAPON CHECK
-        // =============================
-
         boolean nameWeaponMatch = false;
 
         if (killer != null) {
             ItemStack weapon = killer.getInventory().getItemInMainHand();
-
             if (weapon != null && weapon.hasItemMeta()) {
                 ItemMeta meta = weapon.getItemMeta();
-
                 if (meta != null && meta.hasDisplayName()) {
                     String weaponName = ChatColor.stripColor(meta.getDisplayName());
                     nameWeaponMatch = weaponName.equalsIgnoreCase(realVictimName);
@@ -80,41 +64,34 @@ public class DeathListener implements Listener {
             }
         }
 
-        boolean victimIsRevealed = RevealManager.isRevealed(victim);
+        boolean revealed = RevealManager.isRevealed(victim);
+        if (!nameWeaponMatch && !(revealed && playerRelated)) return;
 
-        if (!nameWeaponMatch && !(victimIsRevealed && playerRelated)) return;
-
-        // =============================
-        // MARK CAUGHT
-        // =============================
         victim.setMetadata("caught",
                 new FixedMetadataValue(HiddenTest.getInstance(), true));
 
         RevealManager.hide(victim);
 
-        // =============================
-        // DROP HEAD
-        // =============================
+        // 🔥 FIXED HEAD (REAL SKIN)
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
 
-        if (skullMeta != null) {
-            skullMeta.setOwningPlayer(victim);
-            skullMeta.setDisplayName(ChatColor.RED + realVictimName + "'s Head");
-            head.setItemMeta(skullMeta);
+        if (meta != null) {
+            PlayerProfile profile = ProfileManager.getRealProfile(victim);
+
+            if (profile != null) {
+                meta.setPlayerProfile(profile.clone()); // ✅ THIS is the fix
+            }
+
+            meta.setDisplayName(ChatColor.RED + realVictimName + "'s Head");
+            head.setItemMeta(meta);
         }
 
         victim.getWorld().dropItemNaturally(victim.getLocation(), head);
 
-        // =============================
-        // BROADCAST
-        // =============================
         Bukkit.broadcastMessage(ChatColor.YELLOW + realVictimName + " left the game");
         Bukkit.broadcastMessage(CAUGHT_COLOR + realVictimName + " has been caught.");
 
-        // =============================
-        // GLOBAL WITHER SOUND
-        // =============================
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.playSound(
                     online.getLocation(),
@@ -124,9 +101,6 @@ public class DeathListener implements Listener {
             );
         }
 
-        // =============================
-        // BAN + KICK
-        // =============================
         Bukkit.getBanList(BanList.Type.NAME).addBan(
                 realVictimName,
                 CAUGHT_COLOR + "You have been caught.",
@@ -139,7 +113,6 @@ public class DeathListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-
         Player player = event.getPlayer();
 
         if (player.hasMetadata("caught")) {
