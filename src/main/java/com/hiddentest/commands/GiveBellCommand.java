@@ -1,7 +1,7 @@
 package com.hiddentest.commands;
 
 import com.hiddentest.items.BellOfTruth;
-import com.hiddentest.HiddenTest;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,14 +11,11 @@ import org.bukkit.entity.Player;
 
 public class GiveBellCommand implements CommandExecutor {
 
-    private final HiddenTest plugin;
-
-    public GiveBellCommand(HiddenTest plugin) {
-        this.plugin = plugin;
-    }
-
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender,
+                             Command command,
+                             String label,
+                             String[] args) {
 
         if (!sender.hasPermission("hiddentest.givebell")) {
             sender.sendMessage(ChatColor.RED + "You do not have permission.");
@@ -37,11 +34,19 @@ public class GiveBellCommand implements CommandExecutor {
             return true;
         }
 
-        BellOfTruth bell = new BellOfTruth(plugin);
-        target.getInventory().addItem(bell.createBell());
+        // ✅ FIXED
+        target.getInventory().addItem(BellOfTruth.createBell());
 
-        sender.sendMessage(ChatColor.GREEN + "Gave Bell of Truth to " + target.getName());
-        target.sendMessage(ChatColor.GOLD + "You received a Bell of Truth.");
+        sender.sendMessage(
+                ChatColor.GREEN +
+                "Gave Bell of Truth to " +
+                target.getName()
+        );
+
+        target.sendMessage(
+                ChatColor.GOLD +
+                "You received a Bell of Truth."
+        );
 
         return true;
     }
