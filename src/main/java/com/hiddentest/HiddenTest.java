@@ -14,7 +14,7 @@ import com.hiddentest.reveal.RevealManager;
 import com.hiddentest.world.EndLightning;
 import com.hiddentest.world.EndReform;
 import com.hiddentest.world.ServerStart;
-import com.hiddentest.world.RenameCapital; // ✅ ADDED
+import com.hiddentest.world.RenameCapital;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -42,7 +42,10 @@ public final class HiddenTest extends JavaPlugin {
         // ITEMS
         // =========================
         getServer().getPluginManager().registerEvents(new DetectivesCompass(this), this);
-        getServer().getPluginManager().registerEvents(new BellOfTruth(this), this);
+
+        BellOfTruth bellOfTruth = new BellOfTruth(this);
+        getServer().getPluginManager().registerEvents(bellOfTruth, this);
+
         getServer().getPluginManager().registerEvents(new DragonEgg(this), this);
 
         // =========================
@@ -54,6 +57,7 @@ public final class HiddenTest extends JavaPlugin {
         // UNKNOWN CHICKEN BOSS
         // =========================
         UnknownChicken unknownChicken = new UnknownChicken(this);
+
         getServer().getPluginManager().registerEvents(unknownChicken, this);
         getCommand("summonchicken").setExecutor(unknownChicken);
 
@@ -62,17 +66,20 @@ public final class HiddenTest extends JavaPlugin {
         // =========================
         getCommand("reveal").setExecutor(new RevealCommand());
         getCommand("hide").setExecutor(new RevealCommand());
+
         getCommand("givecompass").setExecutor(new GiveCompassCommand());
-        getCommand("givebell").setExecutor(new GiveBellCommand(this));
+
+        // ✅ FIXED
+        getCommand("givebell").setExecutor(new GiveBellCommand());
+
         getCommand("givebook").setExecutor(new BookOfNames());
 
-        // SERVER START COMMAND
         getCommand("serverstart").setExecutor(new ServerStart(this));
 
         // =========================
         // WORLD / MECHANICS
         // =========================
-        getServer().getPluginManager().registerEvents(new RenameCapital(), this); // ✅ ADDED
+        getServer().getPluginManager().registerEvents(new RenameCapital(), this);
 
         // =========================
         // EASY RECIPES
