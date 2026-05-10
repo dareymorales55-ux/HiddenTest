@@ -36,17 +36,18 @@ public class BellOfTruth implements Listener {
     public BellOfTruth(HiddenTest plugin) {
         this.plugin = plugin;
         this.bellKey = new NamespacedKey(plugin, "bell_of_truth");
-
-        registerRecipe();
     }
 
     /* =========================
-       RECIPE (FIXED)
+       RECIPE
        ========================= */
 
-    private void registerRecipe() {
+    public void registerRecipe() {
 
         NamespacedKey key = new NamespacedKey(plugin, "bell_of_truth");
+
+        // ✅ Prevent duplicate recipe issues
+        Bukkit.removeRecipe(key);
 
         ShapedRecipe recipe = new ShapedRecipe(key, createBell());
 
@@ -60,8 +61,9 @@ public class BellOfTruth implements Listener {
         recipe.setIngredient('A', Material.AMETHYST_SHARD);
         recipe.setIngredient('G', Material.GOLD_INGOT);
 
-        // ✅ ONLY accept your custom Detective's Compass
-        recipe.setIngredient('C',
+        // ✅ ONLY accept custom Detective's Compass
+        recipe.setIngredient(
+                'C',
                 new RecipeChoice.ExactChoice(
                         DetectivesCompass.createDetectivesCompass()
                 )
@@ -78,20 +80,26 @@ public class BellOfTruth implements Listener {
     public void onPlace(BlockPlaceEvent event) {
 
         ItemStack item = event.getItemInHand();
+
         if (item.getType() != Material.BELL) return;
         if (!item.hasItemMeta()) return;
 
-        if (!item.getItemMeta().getPersistentDataContainer()
+        if (!item.getItemMeta()
+                .getPersistentDataContainer()
                 .has(bellKey, PersistentDataType.BOOLEAN)) return;
 
         Block block = event.getBlockPlaced();
 
         NamespacedKey blockKey = new NamespacedKey(
                 plugin,
-                "bell_" + block.getX() + "_" + block.getY() + "_" + block.getZ()
+                "bell_" +
+                        block.getX() + "_" +
+                        block.getY() + "_" +
+                        block.getZ()
         );
 
-        block.getChunk().getPersistentDataContainer()
+        block.getChunk()
+                .getPersistentDataContainer()
                 .set(blockKey, PersistentDataType.BOOLEAN, true);
     }
 
@@ -103,23 +111,31 @@ public class BellOfTruth implements Listener {
     public void onBreak(BlockBreakEvent event) {
 
         Block block = event.getBlock();
+
         if (block.getType() != Material.BELL) return;
 
         NamespacedKey blockKey = new NamespacedKey(
                 plugin,
-                "bell_" + block.getX() + "_" + block.getY() + "_" + block.getZ()
+                "bell_" +
+                        block.getX() + "_" +
+                        block.getY() + "_" +
+                        block.getZ()
         );
 
-        if (!block.getChunk().getPersistentDataContainer()
+        if (!block.getChunk()
+                .getPersistentDataContainer()
                 .has(blockKey, PersistentDataType.BOOLEAN)) return;
 
         event.setDropItems(false);
+
         block.getWorld().dropItemNaturally(
                 block.getLocation(),
                 createBell()
         );
 
-        block.getChunk().getPersistentDataContainer().remove(blockKey);
+        block.getChunk()
+                .getPersistentDataContainer()
+                .remove(blockKey);
     }
 
     /* =========================
@@ -132,30 +148,47 @@ public class BellOfTruth implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         Block block = event.getClickedBlock();
+
         if (block == null || block.getType() != Material.BELL) return;
 
         NamespacedKey blockKey = new NamespacedKey(
                 plugin,
-                "bell_" + block.getX() + "_" + block.getY() + "_" + block.getZ()
+                "bell_" +
+                        block.getX() + "_" +
+                        block.getY() + "_" +
+                        block.getZ()
         );
 
-        if (!block.getChunk().getPersistentDataContainer()
+        if (!block.getChunk()
+                .getPersistentDataContainer()
                 .has(blockKey, PersistentDataType.BOOLEAN)) return;
 
         Player player = event.getPlayer();
 
-        long remaining = getCooldownRemaining(player.getUniqueId());
+        long remaining =
+                getCooldownRemaining(player.getUniqueId());
+
         if (remaining > 0) {
+
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED +
-                    "Bell on cooldown: " + formatTime((int) remaining));
+
+            player.sendMessage(
+                    ChatColor.RED +
+                            "Bell on cooldown: " +
+                            formatTime((int) remaining)
+            );
+
             return;
         }
 
-        cooldowns.put(player.getUniqueId(),
-                System.currentTimeMillis() + COOLDOWN_SECONDS * 1000L);
+        cooldowns.put(
+                player.getUniqueId(),
+                System.currentTimeMillis()
+                        + COOLDOWN_SECONDS * 1000L
+        );
 
-        Location center = block.getLocation().add(0.5, 0.5, 0.5);
+        Location center =
+                block.getLocation().add(0.5, 0.5, 0.5);
 
         spawnParticles(center);
         revealNearby(center, player);
@@ -168,8 +201,12 @@ public class BellOfTruth implements Listener {
         for (Player target : Bukkit.getOnlinePlayers()) {
 
             if (target.equals(ringer)) continue;
-            if (!target.getWorld().equals(center.getWorld())) continue;
-            if (target.getLocation().distance(center) > RADIUS) continue;
+
+            if (!target.getWorld()
+                    .equals(center.getWorld())) continue;
+
+            if (target.getLocation()
+                    .distance(center) > RADIUS) continue;
 
             RevealManager.reveal(target, REVEAL_DURATION);
         }
@@ -195,10 +232,16 @@ public class BellOfTruth implements Listener {
 
                 for (int i = 0; i < points; i++) {
 
-                    double angle = 2 * Math.PI * i / points;
+                    double angle =
+                            2 * Math.PI * i / points;
 
-                    double x = center.getX() + RADIUS * Math.cos(angle);
-                    double z = center.getZ() + RADIUS * Math.sin(angle);
+                    double x =
+                            center.getX()
+                                    + RADIUS * Math.cos(angle);
+
+                    double z =
+                            center.getZ()
+                                    + RADIUS * Math.sin(angle);
 
                     Location loc = new Location(
                             center.getWorld(),
@@ -211,7 +254,10 @@ public class BellOfTruth implements Listener {
                             Particle.DUST,
                             loc,
                             1,
-                            new Particle.DustOptions(Color.RED, 1.5f)
+                            new Particle.DustOptions(
+                                    Color.RED,
+                                    1.5f
+                            )
                     );
                 }
 
@@ -226,11 +272,15 @@ public class BellOfTruth implements Listener {
     private long getCooldownRemaining(UUID uuid) {
 
         Long expiry = cooldowns.get(uuid);
+
         if (expiry == null) return 0;
 
-        long remaining = (expiry - System.currentTimeMillis()) / 1000L;
+        long remaining =
+                (expiry - System.currentTimeMillis())
+                        / 1000L;
 
         if (remaining <= 0) {
+
             cooldowns.remove(uuid);
             return 0;
         }
@@ -239,7 +289,12 @@ public class BellOfTruth implements Listener {
     }
 
     private String formatTime(int seconds) {
-        return String.format("%02d:%02d", seconds / 60, seconds % 60);
+
+        return String.format(
+                "%02d:%02d",
+                seconds / 60,
+                seconds % 60
+        );
     }
 
     /* ========================= */
@@ -247,11 +302,17 @@ public class BellOfTruth implements Listener {
     public ItemStack createBell() {
 
         ItemStack bell = new ItemStack(Material.BELL);
+
         ItemMeta meta = bell.getItemMeta();
 
-        meta.setDisplayName(ChatColor.RED.toString() + ChatColor.BOLD + "Bell of Truth");
+        meta.setDisplayName(
+                ChatColor.RED.toString()
+                        + ChatColor.BOLD
+                        + "Bell of Truth"
+        );
 
         List<String> lore = new ArrayList<>();
+
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
         lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
@@ -259,13 +320,22 @@ public class BellOfTruth implements Listener {
 
         meta.setLore(lore);
 
-        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        meta.addEnchant(
+                Enchantment.UNBREAKING,
+                1,
+                true
+        );
+
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
-        meta.getPersistentDataContainer()
-                .set(bellKey, PersistentDataType.BOOLEAN, true);
+        meta.getPersistentDataContainer().set(
+                bellKey,
+                PersistentDataType.BOOLEAN,
+                true
+        );
 
         bell.setItemMeta(meta);
+
         return bell;
     }
 }
