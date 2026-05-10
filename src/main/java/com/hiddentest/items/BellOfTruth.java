@@ -2,6 +2,7 @@ package com.hiddentest.items;
 
 import com.hiddentest.HiddenTest;
 import com.hiddentest.reveal.RevealManager;
+
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -22,34 +23,34 @@ import java.util.*;
 public class BellOfTruth implements Listener {
 
     private final HiddenTest plugin;
-    private final NamespacedKey bellKey;
+
+    // ✅ STATIC
+    private static NamespacedKey bellKey;
+
     private final Map<UUID, Long> cooldowns = new HashMap<>();
 
     private static final double RADIUS = 15.0;
 
-    // 5 seconds
     private static final int REVEAL_DURATION = 5 * 20;
 
-    // 2 minutes
     private static final int COOLDOWN_SECONDS = 120;
 
     public BellOfTruth(HiddenTest plugin) {
+
         this.plugin = plugin;
-        this.bellKey = new NamespacedKey(plugin, "bell_of_truth");
+
+        bellKey = new NamespacedKey(plugin, "bell_of_truth");
+
+        registerRecipe();
     }
 
-    /* =========================
-       RECIPE
-       ========================= */
+    private void registerRecipe() {
 
-    public void registerRecipe() {
+        NamespacedKey key =
+                new NamespacedKey(plugin, "bell_of_truth");
 
-        NamespacedKey key = new NamespacedKey(plugin, "bell_of_truth");
-
-        // ✅ Prevent duplicate recipe issues
-        Bukkit.removeRecipe(key);
-
-        ShapedRecipe recipe = new ShapedRecipe(key, createBell());
+        ShapedRecipe recipe =
+                new ShapedRecipe(key, createBell());
 
         recipe.shape(
                 "BAB",
@@ -61,7 +62,6 @@ public class BellOfTruth implements Listener {
         recipe.setIngredient('A', Material.AMETHYST_SHARD);
         recipe.setIngredient('G', Material.GOLD_INGOT);
 
-        // ✅ ONLY accept custom Detective's Compass
         recipe.setIngredient(
                 'C',
                 new RecipeChoice.ExactChoice(
@@ -71,10 +71,6 @@ public class BellOfTruth implements Listener {
 
         Bukkit.addRecipe(recipe);
     }
-
-    /* =========================
-       PLACE
-       ========================= */
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
@@ -100,12 +96,10 @@ public class BellOfTruth implements Listener {
 
         block.getChunk()
                 .getPersistentDataContainer()
-                .set(blockKey, PersistentDataType.BOOLEAN, true);
+                .set(blockKey,
+                        PersistentDataType.BOOLEAN,
+                        true);
     }
-
-    /* =========================
-       BREAK
-       ========================= */
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
@@ -124,7 +118,8 @@ public class BellOfTruth implements Listener {
 
         if (!block.getChunk()
                 .getPersistentDataContainer()
-                .has(blockKey, PersistentDataType.BOOLEAN)) return;
+                .has(blockKey,
+                        PersistentDataType.BOOLEAN)) return;
 
         event.setDropItems(false);
 
@@ -137,10 +132,6 @@ public class BellOfTruth implements Listener {
                 .getPersistentDataContainer()
                 .remove(blockKey);
     }
-
-    /* =========================
-       RING
-       ========================= */
 
     @EventHandler
     public void onRing(PlayerInteractEvent event) {
@@ -161,7 +152,8 @@ public class BellOfTruth implements Listener {
 
         if (!block.getChunk()
                 .getPersistentDataContainer()
-                .has(blockKey, PersistentDataType.BOOLEAN)) return;
+                .has(blockKey,
+                        PersistentDataType.BOOLEAN)) return;
 
         Player player = event.getPlayer();
 
@@ -174,8 +166,8 @@ public class BellOfTruth implements Listener {
 
             player.sendMessage(
                     ChatColor.RED +
-                            "Bell on cooldown: " +
-                            formatTime((int) remaining)
+                    "Bell on cooldown: " +
+                    formatTime((int) remaining)
             );
 
             return;
@@ -191,10 +183,9 @@ public class BellOfTruth implements Listener {
                 block.getLocation().add(0.5, 0.5, 0.5);
 
         spawnParticles(center);
+
         revealNearby(center, player);
     }
-
-    /* ========================= */
 
     private void revealNearby(Location center, Player ringer) {
 
@@ -202,17 +193,13 @@ public class BellOfTruth implements Listener {
 
             if (target.equals(ringer)) continue;
 
-            if (!target.getWorld()
-                    .equals(center.getWorld())) continue;
+            if (!target.getWorld().equals(center.getWorld())) continue;
 
-            if (target.getLocation()
-                    .distance(center) > RADIUS) continue;
+            if (target.getLocation().distance(center) > RADIUS) continue;
 
             RevealManager.reveal(target, REVEAL_DURATION);
         }
     }
-
-    /* ========================= */
 
     private void spawnParticles(Location center) {
 
@@ -267,8 +254,6 @@ public class BellOfTruth implements Listener {
         }.runTaskTimer(plugin, 0L, 1L);
     }
 
-    /* ========================= */
-
     private long getCooldownRemaining(UUID uuid) {
 
         Long expiry = cooldowns.get(uuid);
@@ -276,12 +261,12 @@ public class BellOfTruth implements Listener {
         if (expiry == null) return 0;
 
         long remaining =
-                (expiry - System.currentTimeMillis())
-                        / 1000L;
+                (expiry - System.currentTimeMillis()) / 1000L;
 
         if (remaining <= 0) {
 
             cooldowns.remove(uuid);
+
             return 0;
         }
 
@@ -297,13 +282,14 @@ public class BellOfTruth implements Listener {
         );
     }
 
-    /* ========================= */
+    // ✅ STATIC
+    public static ItemStack createBell() {
 
-    public ItemStack createBell() {
+        ItemStack bell =
+                new ItemStack(Material.BELL);
 
-        ItemStack bell = new ItemStack(Material.BELL);
-
-        ItemMeta meta = bell.getItemMeta();
+        ItemMeta meta =
+                bell.getItemMeta();
 
         meta.setDisplayName(
                 ChatColor.RED.toString()
@@ -311,7 +297,8 @@ public class BellOfTruth implements Listener {
                         + "Bell of Truth"
         );
 
-        List<String> lore = new ArrayList<>();
+        List<String> lore =
+                new ArrayList<>();
 
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
