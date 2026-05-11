@@ -31,9 +31,11 @@ public class BellOfTruth implements Listener {
 
     private static final double RADIUS = 15.0;
 
+    // 5 seconds
     private static final int REVEAL_DURATION = 5 * 20;
 
-    private static final int COOLDOWN_SECONDS = 120;
+    // ✅ 1 minute cooldown
+    private static final int COOLDOWN_SECONDS = 60;
 
     public BellOfTruth(HiddenTest plugin) {
 
@@ -185,6 +187,11 @@ public class BellOfTruth implements Listener {
         spawnParticles(center);
 
         revealNearby(center, player);
+
+        player.sendMessage(
+                ChatColor.GREEN +
+                "Bell activated."
+        );
     }
 
     private void revealNearby(Location center, Player ringer) {
@@ -303,6 +310,7 @@ public class BellOfTruth implements Listener {
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
         lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
+        lore.add(ChatColor.GRAY + "Cooldown: 1 minute");
         lore.add(ChatColor.RED + "Does not reveal the ringer");
 
         meta.setLore(lore);
