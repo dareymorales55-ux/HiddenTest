@@ -1,7 +1,9 @@
 package com.hiddentest;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.hiddentest.items.UnknownTotem;
 import com.hiddentest.reveal.RevealManager;
+
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.BanList;
@@ -25,30 +27,39 @@ import java.util.Arrays;
 public class DeathListener implements Listener {
 
     // ✅ Regular Minecraft red
-    private static final String CAUGHT_COLOR = ChatColor.RED.toString();
+    private static final String CAUGHT_COLOR =
+            ChatColor.RED.toString();
 
     // ✅ Orange for head name
-    private static final String ORANGE = ChatColor.of("#FFA500").toString();
+    private static final String ORANGE =
+            ChatColor.of("#FFA500").toString();
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
 
-        Player victim = event.getEntity();
+        Player victim =
+                event.getEntity();
 
-        if (victim.hasMetadata("caught")) return;
+        if (victim.hasMetadata("caught"))
+            return;
 
-        String realVictimName = ProfileManager.getRealName(victim);
+        String realVictimName =
+                ProfileManager.getRealName(victim);
 
         // =============================
         // DETERMINE PLAYER-RELATED DEATH
         // =============================
 
-        Player killer = victim.getKiller();
-        boolean playerRelated = killer != null;
+        Player killer =
+                victim.getKiller();
+
+        boolean playerRelated =
+                killer != null;
 
         if (!playerRelated) {
 
-            EntityDamageEvent lastDamage = victim.getLastDamageCause();
+            EntityDamageEvent lastDamage =
+                    victim.getLastDamageCause();
 
             if (lastDamage != null) {
 
@@ -61,6 +72,7 @@ public class DeathListener implements Listener {
                     case ENTITY_EXPLOSION:
                     case BLOCK_EXPLOSION:
                     case PROJECTILE:
+
                         playerRelated = true;
                         break;
                 }
@@ -75,25 +87,53 @@ public class DeathListener implements Listener {
 
         if (killer != null) {
 
-            ItemStack weapon = killer.getInventory().getItemInMainHand();
+            ItemStack weapon =
+                    killer.getInventory()
+                            .getItemInMainHand();
 
-            if (weapon != null && weapon.hasItemMeta()) {
+            if (weapon != null &&
+                weapon.hasItemMeta()) {
 
-                if (weapon.getItemMeta().hasDisplayName()) {
+                if (weapon.getItemMeta()
+                        .hasDisplayName()) {
 
-                    String weaponName = ChatColor.stripColor(
-                            weapon.getItemMeta().getDisplayName()
-                    );
+                    String weaponName =
+                            ChatColor.stripColor(
+                                    weapon.getItemMeta()
+                                            .getDisplayName()
+                            );
 
                     nameWeaponMatch =
-                            weaponName.equalsIgnoreCase(realVictimName);
+                            weaponName.equalsIgnoreCase(
+                                    realVictimName
+                            );
                 }
             }
         }
 
-        boolean revealed = RevealManager.isRevealed(victim);
+        boolean revealed =
+                RevealManager.isRevealed(victim);
 
-        if (!nameWeaponMatch && !(revealed && playerRelated)) {
+        if (!nameWeaponMatch &&
+            !(revealed && playerRelated)) {
+
+            return;
+        }
+
+        // =============================
+        // UNKNOWN TOTEM SAVE
+        // =============================
+
+        if (UnknownTotem.hasUnknownTotem(victim)) {
+
+            UnknownTotem.consumeTotem(victim);
+
+            Bukkit.broadcastMessage(
+                    ChatColor.RED +
+                    victim.getName() +
+                    " has been saved by the Unknown Totem."
+            );
+
             return;
         }
 
@@ -103,7 +143,10 @@ public class DeathListener implements Listener {
 
         victim.setMetadata(
                 "caught",
-                new FixedMetadataValue(HiddenTest.getInstance(), true)
+                new FixedMetadataValue(
+                        HiddenTest.getInstance(),
+                        true
+                )
         );
 
         RevealManager.hide(victim);
@@ -112,16 +155,23 @@ public class DeathListener implements Listener {
         // CREATE HEAD
         // =============================
 
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        ItemStack head =
+                new ItemStack(Material.PLAYER_HEAD);
+
+        SkullMeta meta =
+                (SkullMeta) head.getItemMeta();
 
         if (meta != null) {
 
             // ✅ REAL PLAYER SKIN
-            PlayerProfile profile = ProfileManager.getRealProfile(victim);
+            PlayerProfile profile =
+                    ProfileManager.getRealProfile(victim);
 
             if (profile != null) {
-                meta.setPlayerProfile(profile.clone());
+
+                meta.setPlayerProfile(
+                        profile.clone()
+                );
             }
 
             // ✅ BOLD ORANGE NAME
@@ -137,7 +187,8 @@ public class DeathListener implements Listener {
             // LOCATION LORE
             // =============================
 
-            Location loc = victim.getLocation();
+            Location loc =
+                    victim.getLocation();
 
             String coords =
                     ChatColor.YELLOW +
@@ -153,28 +204,41 @@ public class DeathListener implements Listener {
             String dimensionLine;
 
             World.Environment env =
-                    loc.getWorld().getEnvironment();
+                    loc.getWorld()
+                            .getEnvironment();
 
             switch (env) {
 
                 case NORMAL:
+
                     dimensionLine =
-                            ChatColor.GREEN + "Overworld";
+                            ChatColor.GREEN +
+                            "Overworld";
+
                     break;
 
                 case NETHER:
+
                     dimensionLine =
-                            ChatColor.RED + "Nether";
+                            ChatColor.RED +
+                            "Nether";
+
                     break;
 
                 case THE_END:
+
                     dimensionLine =
-                            ChatColor.LIGHT_PURPLE + "The End";
+                            ChatColor.LIGHT_PURPLE +
+                            "The End";
+
                     break;
 
                 default:
+
                     dimensionLine =
-                            ChatColor.GRAY + "Unknown";
+                            ChatColor.GRAY +
+                            "Unknown";
+
                     break;
             }
 
@@ -216,7 +280,8 @@ public class DeathListener implements Listener {
         // GLOBAL SOUND
         // =============================
 
-        for (Player online : Bukkit.getOnlinePlayers()) {
+        for (Player online :
+                Bukkit.getOnlinePlayers()) {
 
             online.playSound(
                     online.getLocation(),
@@ -230,26 +295,30 @@ public class DeathListener implements Listener {
         // BAN PLAYER
         // =============================
 
-        Bukkit.getBanList(BanList.Type.NAME).addBan(
-                realVictimName,
-                CAUGHT_COLOR + "You have been caught.",
-                null,
-                null
-        );
+        Bukkit.getBanList(BanList.Type.NAME)
+                .addBan(
+                        realVictimName,
+                        CAUGHT_COLOR +
+                        "You have been caught.",
+                        null,
+                        null
+                );
 
         // =============================
         // KICK PLAYER
         // =============================
 
         victim.kickPlayer(
-                CAUGHT_COLOR + "You have been caught."
+                CAUGHT_COLOR +
+                "You have been caught."
         );
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
 
-        Player player = event.getPlayer();
+        Player player =
+                event.getPlayer();
 
         if (player.hasMetadata("caught")) {
 
