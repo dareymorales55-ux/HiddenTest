@@ -12,6 +12,7 @@ import com.hiddentest.items.BloodCompass;
 import com.hiddentest.items.BookOfNames;
 import com.hiddentest.items.DetectivesCompass;
 import com.hiddentest.items.DragonEgg;
+import com.hiddentest.items.UnknownTotem;
 
 import com.hiddentest.mobs.UnknownChicken;
 
@@ -82,6 +83,15 @@ public final class HiddenTest extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(
                 new DragonEgg(this),
+                this
+        );
+
+        // =========================
+        // UNKNOWN TOTEM
+        // =========================
+
+        getServer().getPluginManager().registerEvents(
+                new UnknownTotem(),
                 this
         );
 
