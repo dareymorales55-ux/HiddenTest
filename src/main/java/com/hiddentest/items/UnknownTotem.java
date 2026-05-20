@@ -6,11 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -69,7 +67,9 @@ public class UnknownTotem implements Listener {
                 meta.addEnchant(enchant, 1, true);
             }
 
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            meta.addItemFlags(
+                    ItemFlag.HIDE_ENCHANTS
+            );
 
             item.setItemMeta(meta);
         }
@@ -77,26 +77,28 @@ public class UnknownTotem implements Listener {
         return item;
     }
 
-    // =========================
-    // PREVENT VANILLA TOTEM SAVE
-    // =========================
+    /**
+     * Prevents the vanilla Totem of Undying effect.
+     * The totem is NOT consumed here.
+     * DeathListener will consume it only if the death
+     * would have caused the player to be caught.
+     */
     @EventHandler
     public void onResurrect(EntityResurrectEvent event) {
 
-        if (!(event.getEntity() instanceof Player player))
+        if (!(event.getEntity() instanceof org.bukkit.entity.Player player))
             return;
 
-        EquipmentSlot slot = event.getHand();
+        ItemStack main =
+                player.getInventory().getItemInMainHand();
 
-        ItemStack item = player.getInventory().getItem(slot);
+        ItemStack off =
+                player.getInventory().getItemInOffHand();
 
-        if (isUnknownTotem(item)) {
+        if (isUnknownTotem(main) || isUnknownTotem(off)) {
 
-            // cancel vanilla "death prevention"
+            // Cancel the vanilla "save from death"
             event.setCancelled(true);
-
-            // consume your custom totem
-            consumeTotem(player);
         }
     }
 
@@ -105,13 +107,15 @@ public class UnknownTotem implements Listener {
         if (item == null)
             return false;
 
-        if (item.getType() != Material.TOTEM_OF_UNDYING)
+        if (item.getType()
+                != Material.TOTEM_OF_UNDYING)
             return false;
 
         if (!item.hasItemMeta())
             return false;
 
-        if (!item.getItemMeta().hasDisplayName())
+        if (!item.getItemMeta()
+                .hasDisplayName())
             return false;
 
         return item.getItemMeta()
@@ -124,25 +128,44 @@ public class UnknownTotem implements Listener {
                 );
     }
 
-    public static boolean hasUnknownTotem(Player player) {
+    public static boolean hasUnknownTotem(
+            org.bukkit.entity.Player player
+    ) {
 
-        return isUnknownTotem(player.getInventory().getItemInMainHand())
-                || isUnknownTotem(player.getInventory().getItemInOffHand());
+        return isUnknownTotem(
+                player.getInventory()
+                        .getItemInMainHand()
+        ) ||
+        isUnknownTotem(
+                player.getInventory()
+                        .getItemInOffHand()
+        );
     }
 
-    public static void consumeTotem(Player player) {
+    public static void consumeTotem(
+            org.bukkit.entity.Player player
+    ) {
 
-        ItemStack main = player.getInventory().getItemInMainHand();
+        ItemStack main =
+                player.getInventory()
+                        .getItemInMainHand();
 
         if (isUnknownTotem(main)) {
-            player.getInventory().setItemInMainHand(null);
+
+            player.getInventory()
+                    .setItemInMainHand(null);
+
             return;
         }
 
-        ItemStack off = player.getInventory().getItemInOffHand();
+        ItemStack off =
+                player.getInventory()
+                        .getItemInOffHand();
 
         if (isUnknownTotem(off)) {
-            player.getInventory().setItemInOffHand(null);
+
+            player.getInventory()
+                    .setItemInOffHand(null);
         }
     }
 }
