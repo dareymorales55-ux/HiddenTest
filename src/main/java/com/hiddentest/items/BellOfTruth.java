@@ -310,7 +310,6 @@ public class BellOfTruth implements Listener {
         lore.add(ChatColor.GRAY + "Ring to reveal players");
         lore.add(ChatColor.GRAY + "Reveals players in a 15 block radius");
         lore.add(ChatColor.GRAY + "Reveal lasts 5 seconds");
-        lore.add(ChatColor.GRAY + "Cooldown: 1 minute");
         lore.add(ChatColor.RED + "Does not reveal the ringer");
 
         meta.setLore(lore);
