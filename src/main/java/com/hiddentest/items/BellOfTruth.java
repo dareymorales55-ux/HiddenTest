@@ -13,7 +13,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,7 +35,7 @@ public class BellOfTruth implements Listener {
     // 5 seconds
     private static final int REVEAL_DURATION = 5 * 20;
 
-    // ✅ 1 minute cooldown
+    // 1 minute cooldown
     private static final int COOLDOWN_SECONDS = 60;
 
     public BellOfTruth(HiddenTest plugin) {
@@ -43,35 +44,7 @@ public class BellOfTruth implements Listener {
 
         bellKey = new NamespacedKey(plugin, "bell_of_truth");
 
-        registerRecipe();
-    }
-
-    private void registerRecipe() {
-
-        NamespacedKey key =
-                new NamespacedKey(plugin, "bell_of_truth");
-
-        ShapedRecipe recipe =
-                new ShapedRecipe(key, createBell());
-
-        recipe.shape(
-                "BAB",
-                "GCG",
-                "AGA"
-        );
-
-        recipe.setIngredient('B', Material.BLAZE_ROD);
-        recipe.setIngredient('A', Material.AMETHYST_SHARD);
-        recipe.setIngredient('G', Material.GOLD_INGOT);
-
-        recipe.setIngredient(
-                'C',
-                new RecipeChoice.ExactChoice(
-                        DetectivesCompass.createDetectivesCompass()
-                )
-        );
-
-        Bukkit.addRecipe(recipe);
+        // ✅ RECIPE REMOVED
     }
 
     @EventHandler
@@ -98,9 +71,11 @@ public class BellOfTruth implements Listener {
 
         block.getChunk()
                 .getPersistentDataContainer()
-                .set(blockKey,
+                .set(
+                        blockKey,
                         PersistentDataType.BOOLEAN,
-                        true);
+                        true
+                );
     }
 
     @EventHandler
@@ -120,8 +95,10 @@ public class BellOfTruth implements Listener {
 
         if (!block.getChunk()
                 .getPersistentDataContainer()
-                .has(blockKey,
-                        PersistentDataType.BOOLEAN)) return;
+                .has(
+                        blockKey,
+                        PersistentDataType.BOOLEAN
+                )) return;
 
         event.setDropItems(false);
 
@@ -154,8 +131,10 @@ public class BellOfTruth implements Listener {
 
         if (!block.getChunk()
                 .getPersistentDataContainer()
-                .has(blockKey,
-                        PersistentDataType.BOOLEAN)) return;
+                .has(
+                        blockKey,
+                        PersistentDataType.BOOLEAN
+                )) return;
 
         Player player = event.getPlayer();
 
