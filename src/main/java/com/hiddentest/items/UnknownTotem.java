@@ -7,6 +7,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnknownTotem {
+public class UnknownTotem implements Listener {
 
     private static final String COLOR =
             ChatColor.of("#FFA500").toString();
@@ -50,8 +53,8 @@ public class UnknownTotem {
             );
 
             lore.add(
-                    ChatColor.RED +
-                    "Does not prevent death"
+                    ChatColor.GRAY +
+                    "Does NOT prevent death"
             );
 
             meta.setLore(lore);
@@ -62,17 +65,10 @@ public class UnknownTotem {
                     );
 
             if (enchant != null) {
-
-                meta.addEnchant(
-                        enchant,
-                        1,
-                        true
-                );
+                meta.addEnchant(enchant, 1, true);
             }
 
-            meta.addItemFlags(
-                    ItemFlag.HIDE_ENCHANTS
-            );
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
             item.setItemMeta(meta);
         }
@@ -80,20 +76,37 @@ public class UnknownTotem {
         return item;
     }
 
+    // 🔥 THIS IS THE IMPORTANT PART (blocks vanilla totem revive)
+    @EventHandler
+    public void onResurrect(EntityResurrectEvent event) {
+
+        ItemStack item = event.getHand();
+
+        if (!(event.getEntity() instanceof Player player))
+            return;
+
+        if (isUnknownTotem(item)) {
+
+            // cancel vanilla "save from death" effect
+            event.setCancelled(true);
+
+            // consume custom totem manually
+            consumeTotem(player);
+        }
+    }
+
     public static boolean isUnknownTotem(ItemStack item) {
 
         if (item == null)
             return false;
 
-        if (item.getType()
-                != Material.TOTEM_OF_UNDYING)
+        if (item.getType() != Material.TOTEM_OF_UNDYING)
             return false;
 
         if (!item.hasItemMeta())
             return false;
 
-        if (!item.getItemMeta()
-                .hasDisplayName())
+        if (!item.getItemMeta().hasDisplayName())
             return false;
 
         return item.getItemMeta()
@@ -108,39 +121,23 @@ public class UnknownTotem {
 
     public static boolean hasUnknownTotem(Player player) {
 
-        return isUnknownTotem(
-                player.getInventory()
-                        .getItemInMainHand()
-        ) ||
-
-        isUnknownTotem(
-                player.getInventory()
-                        .getItemInOffHand()
-        );
+        return isUnknownTotem(player.getInventory().getItemInMainHand())
+                || isUnknownTotem(player.getInventory().getItemInOffHand());
     }
 
     public static void consumeTotem(Player player) {
 
-        ItemStack main =
-                player.getInventory()
-                        .getItemInMainHand();
+        ItemStack main = player.getInventory().getItemInMainHand();
 
         if (isUnknownTotem(main)) {
-
-            player.getInventory()
-                    .setItemInMainHand(null);
-
+            player.getInventory().setItemInMainHand(null);
             return;
         }
 
-        ItemStack off =
-                player.getInventory()
-                        .getItemInOffHand();
+        ItemStack off = player.getInventory().getItemInOffHand();
 
         if (isUnknownTotem(off)) {
-
-            player.getInventory()
-                    .setItemInOffHand(null);
+            player.getInventory().setItemInOffHand(null);
         }
     }
 }
