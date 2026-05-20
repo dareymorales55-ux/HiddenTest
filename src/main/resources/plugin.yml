@@ -7,6 +7,7 @@ author: Deejay
 description: Identity anonymization and reveal testing plugin.
 
 commands:
+
   reveal:
     description: Reveal a player
     usage: /reveal <player>
@@ -26,6 +27,11 @@ commands:
     description: Gives a Blood Compass
     usage: /givebloodcompass <player>
     permission: hiddentest.givebloodcompass
+
+  givetotem:
+    description: Gives the Unknown Totem
+    usage: /givetotem <player>
+    permission: hiddentest.givetotem
 
   givebell:
     description: Gives the Bell of Truth
@@ -48,6 +54,7 @@ commands:
     permission: hiddentest.serverstart
 
 permissions:
+
   hiddentest.reveal:
     description: Allows revealing players
     default: op
@@ -62,6 +69,10 @@ permissions:
 
   hiddentest.givebloodcompass:
     description: Allows giving the Blood Compass
+    default: op
+
+  hiddentest.givetotem:
+    description: Allows giving the Unknown Totem
     default: op
 
   hiddentest.givebell:
