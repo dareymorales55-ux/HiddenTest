@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,8 +54,8 @@ public class UnknownTotem implements Listener {
             );
 
             lore.add(
-                    ChatColor.GRAY +
-                    "Does NOT prevent death"
+                    ChatColor.RED +
+                    "Does not prevent death"
             );
 
             meta.setLore(lore);
@@ -76,21 +77,25 @@ public class UnknownTotem implements Listener {
         return item;
     }
 
-    // 🔥 THIS IS THE IMPORTANT PART (blocks vanilla totem revive)
+    // =========================
+    // PREVENT VANILLA TOTEM SAVE
+    // =========================
     @EventHandler
     public void onResurrect(EntityResurrectEvent event) {
-
-        ItemStack item = event.getHand();
 
         if (!(event.getEntity() instanceof Player player))
             return;
 
+        EquipmentSlot slot = event.getHand();
+
+        ItemStack item = player.getInventory().getItem(slot);
+
         if (isUnknownTotem(item)) {
 
-            // cancel vanilla "save from death" effect
+            // cancel vanilla "death prevention"
             event.setCancelled(true);
 
-            // consume custom totem manually
+            // consume your custom totem
             consumeTotem(player);
         }
     }
