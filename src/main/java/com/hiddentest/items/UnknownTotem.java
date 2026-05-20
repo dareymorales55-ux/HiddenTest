@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityResurrectEvent;
@@ -78,26 +79,21 @@ public class UnknownTotem implements Listener {
     }
 
     /**
-     * Prevents the vanilla Totem of Undying effect.
+     * Prevent the vanilla Totem of Undying effect.
+     * The player still dies normally.
      * The totem is NOT consumed here.
-     * DeathListener will consume it only if the death
-     * would have caused the player to be caught.
+     * DeathListener handles consuming it only when
+     * it prevents the player from being caught.
      */
     @EventHandler
     public void onResurrect(EntityResurrectEvent event) {
 
-        if (!(event.getEntity() instanceof org.bukkit.entity.Player player))
+        if (!(event.getEntity() instanceof Player player))
             return;
 
-        ItemStack main =
-                player.getInventory().getItemInMainHand();
+        if (hasUnknownTotem(player)) {
 
-        ItemStack off =
-                player.getInventory().getItemInOffHand();
-
-        if (isUnknownTotem(main) || isUnknownTotem(off)) {
-
-            // Cancel the vanilla "save from death"
+            // Stop vanilla totem save effect.
             event.setCancelled(true);
         }
     }
@@ -128,9 +124,7 @@ public class UnknownTotem implements Listener {
                 );
     }
 
-    public static boolean hasUnknownTotem(
-            org.bukkit.entity.Player player
-    ) {
+    public static boolean hasUnknownTotem(Player player) {
 
         return isUnknownTotem(
                 player.getInventory()
@@ -142,9 +136,11 @@ public class UnknownTotem implements Listener {
         );
     }
 
-    public static void consumeTotem(
-            org.bukkit.entity.Player player
-    ) {
+    /**
+     * Removes one Unknown Totem from the player's
+     * main hand or offhand.
+     */
+    public static void consumeTotem(Player player) {
 
         ItemStack main =
                 player.getInventory()
@@ -167,5 +163,15 @@ public class UnknownTotem implements Listener {
             player.getInventory()
                     .setItemInOffHand(null);
         }
+    }
+
+    /**
+     * Removes all Unknown Totems from death drops.
+     * Call this from DeathListener after consuming
+     * the totem to ensure it never drops.
+     */
+    public static void removeFromDrops(List<ItemStack> drops) {
+
+        drops.removeIf(UnknownTotem::isUnknownTotem);
     }
 }
