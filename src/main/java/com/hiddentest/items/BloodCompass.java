@@ -29,21 +29,20 @@ public class BloodCompass implements Listener {
 
     private final HiddenTest plugin;
 
+    // Players currently tracking a target
     private final Map<UUID, UUID> tracking = new HashMap<>();
 
-    // ✅ 3 minute tracking
-    private static final int TRACK_DURATION_SECONDS = 3 * 60;
+    // Players who have already activated their compass
+    private final Set<UUID> activeHunters = new HashSet<>();
 
+    private static final int TRACK_DURATION_SECONDS = 3 * 60;
     private static final double MIN_TRACK_DISTANCE = 5.0;
 
-    // ✅ COLORS
     private static final String COLOR =
             ChatColor.DARK_RED.toString();
 
     public BloodCompass(HiddenTest plugin) {
-
         this.plugin = plugin;
-
         registerRecipe();
     }
 
@@ -90,12 +89,7 @@ public class BloodCompass implements Listener {
                     );
 
             if (unbreaking != null) {
-
-                meta.addEnchant(
-                        unbreaking,
-                        1,
-                        true
-                );
+                meta.addEnchant(unbreaking, 1, true);
             }
 
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -109,11 +103,12 @@ public class BloodCompass implements Listener {
 
     private boolean isBloodCompass(ItemStack item) {
 
-        if (item == null
-                || item.getType() != Material.RECOVERY_COMPASS)
+        if (item == null ||
+            item.getType() != Material.RECOVERY_COMPASS)
             return false;
 
-        if (!item.hasItemMeta()) return false;
+        if (!item.hasItemMeta())
+            return false;
 
         if (!item.getItemMeta().hasDisplayName())
             return false;
@@ -125,10 +120,6 @@ public class BloodCompass implements Listener {
                 "Blood Compass"
         );
     }
-
-    // =========================
-    // RECIPE
-    // =========================
 
     private void registerRecipe() {
 
@@ -144,36 +135,13 @@ public class BloodCompass implements Listener {
                 "RGR"
         );
 
-        // R = Redstone Block
-        recipe.setIngredient(
-                'R',
-                Material.REDSTONE_BLOCK
-        );
-
-        // E = Enchanted Golden Apple
-        recipe.setIngredient(
-                'E',
-                Material.ENCHANTED_GOLDEN_APPLE
-        );
-
-        // G = Golden Apple
-        recipe.setIngredient(
-                'G',
-                Material.GOLDEN_APPLE
-        );
-
-        // C = Recovery Compass
-        recipe.setIngredient(
-                'C',
-                Material.RECOVERY_COMPASS
-        );
+        recipe.setIngredient('R', Material.REDSTONE_BLOCK);
+        recipe.setIngredient('E', Material.ENCHANTED_GOLDEN_APPLE);
+        recipe.setIngredient('G', Material.GOLDEN_APPLE);
+        recipe.setIngredient('C', Material.RECOVERY_COMPASS);
 
         Bukkit.addRecipe(recipe);
     }
-
-    // =========================
-    // USE
-    // =========================
 
     @EventHandler
     public void onUse(PlayerInteractEvent event) {
@@ -188,9 +156,19 @@ public class BloodCompass implements Listener {
         ItemStack item =
                 event.getItem();
 
-        if (!isBloodCompass(item)) return;
+        if (!isBloodCompass(item))
+            return;
 
         event.setCancelled(true);
+
+        // Already activated and currently in a hunt
+        if (activeHunters.contains(hunter.getUniqueId())) {
+            hunter.sendMessage(
+                    ChatColor.RED +
+                    "This Blood Compass has already been activated."
+            );
+            return;
+        }
 
         if (hunter.getWorld().getEnvironment()
                 != World.Environment.NORMAL) {
@@ -199,7 +177,6 @@ public class BloodCompass implements Listener {
                     ChatColor.RED +
                     "Compass only works in the overworld."
             );
-
             return;
         }
 
@@ -208,10 +185,11 @@ public class BloodCompass implements Listener {
 
         for (Player p : Bukkit.getOnlinePlayers()) {
 
-            if (p.equals(hunter)) continue;
+            if (p.equals(hunter))
+                continue;
 
-            // ✅ ONLY REVEALED PLAYERS
-            if (!RevealManager.isRevealed(p)) continue;
+            if (!RevealManager.isRevealed(p))
+                continue;
 
             if (p.getWorld().getEnvironment()
                     != World.Environment.NORMAL)
@@ -234,13 +212,12 @@ public class BloodCompass implements Listener {
                     ChatColor.GRAY +
                     "No revealed players to track."
             );
-
             return;
         }
 
         possibleTargets.sort(
-                Comparator.comparingDouble(p ->
-                        p.getLocation()
+                Comparator.comparingDouble(
+                        p -> p.getLocation()
                                 .distanceSquared(
                                         hunter.getLocation()
                                 )
@@ -286,12 +263,13 @@ public class BloodCompass implements Listener {
                 target.getUniqueId()
         );
 
+        // Mark as used immediately so it cannot be clicked again.
+        activeHunters.add(
+                hunter.getUniqueId()
+        );
+
         startTracking(hunter, target);
     }
-
-    // =========================
-    // TRACKING
-    // =========================
 
     private void startTracking(
             Player hunter,
@@ -304,19 +282,17 @@ public class BloodCompass implements Listener {
                     TRACK_DURATION_SECONDS;
 
             int tickCounter = 0;
-
             boolean targetLoggedOut = false;
 
             @Override
             public void run() {
 
                 if (!hunter.isOnline()) {
-
+                    cleanup();
                     cancel();
                     return;
                 }
 
-                // ✅ TARGET LOGGED OUT
                 if (!target.isOnline()) {
 
                     targetLoggedOut = true;
@@ -327,9 +303,7 @@ public class BloodCompass implements Listener {
                     );
 
                     end(false);
-
                     cancel();
-
                     return;
                 }
 
@@ -342,9 +316,7 @@ public class BloodCompass implements Listener {
                     );
 
                     end(true);
-
                     cancel();
-
                     return;
                 }
 
@@ -360,15 +332,10 @@ public class BloodCompass implements Listener {
                 ChatColor distColor;
 
                 if (distance <= 15) {
-
                     distColor = ChatColor.GREEN;
-
                 } else if (distance <= 24) {
-
                     distColor = ChatColor.YELLOW;
-
                 } else {
-
                     distColor = ChatColor.RED;
                 }
 
@@ -377,10 +344,8 @@ public class BloodCompass implements Listener {
                         "" +
                         ChatColor.BOLD +
                         formatTime(secondsLeft) +
-
                         ChatColor.GRAY +
                         " | " +
-
                         distColor +
                         (int) distance +
                         "m " +
@@ -397,7 +362,6 @@ public class BloodCompass implements Listener {
                 if (tickCounter >= 20) {
 
                     tickCounter = 0;
-
                     secondsLeft--;
 
                     if (secondsLeft <= 0) {
@@ -413,7 +377,6 @@ public class BloodCompass implements Listener {
                         );
 
                         end(true);
-
                         cancel();
                     }
                 }
@@ -421,9 +384,7 @@ public class BloodCompass implements Listener {
 
             private void end(boolean consumeItem) {
 
-                tracking.remove(
-                        hunter.getUniqueId()
-                );
+                cleanup();
 
                 hunter.playSound(
                         hunter.getLocation(),
@@ -433,7 +394,6 @@ public class BloodCompass implements Listener {
                 );
 
                 if (target.isOnline()) {
-
                     target.playSound(
                             target.getLocation(),
                             Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE,
@@ -442,40 +402,47 @@ public class BloodCompass implements Listener {
                     );
                 }
 
-                // ✅ DESTROY AFTER USE
-                // ❌ DO NOT destroy if target logged out
+                // Destroy after successful use.
+                // Do NOT destroy if target logged out.
                 if (consumeItem && !targetLoggedOut) {
-
-                    ItemStack mainHand =
-                            hunter.getInventory()
-                                    .getItemInMainHand();
-
-                    if (isBloodCompass(mainHand)) {
-
-                        hunter.getInventory()
-                                .setItemInMainHand(null);
-
-                    } else {
-
-                        ItemStack offHand =
-                                hunter.getInventory()
-                                        .getItemInOffHand();
-
-                        if (isBloodCompass(offHand)) {
-
-                            hunter.getInventory()
-                                    .setItemInOffHand(null);
-                        }
-                    }
+                    removeCompass(hunter);
                 }
+            }
+
+            private void cleanup() {
+                tracking.remove(
+                        hunter.getUniqueId()
+                );
+
+                activeHunters.remove(
+                        hunter.getUniqueId()
+                );
             }
 
         }.runTaskTimer(plugin, 0L, 2L);
     }
 
-    // =========================
-    // DIRECTION
-    // =========================
+    private void removeCompass(Player player) {
+
+        ItemStack main =
+                player.getInventory()
+                        .getItemInMainHand();
+
+        if (isBloodCompass(main)) {
+            player.getInventory()
+                    .setItemInMainHand(null);
+            return;
+        }
+
+        ItemStack off =
+                player.getInventory()
+                        .getItemInOffHand();
+
+        if (isBloodCompass(off)) {
+            player.getInventory()
+                    .setItemInOffHand(null);
+        }
+    }
 
     private String getDirectionArrow(
             Player hunter,
@@ -491,8 +458,9 @@ public class BloodCompass implements Listener {
                         - hunter.getLocation().getZ();
 
         double angle =
-                Math.toDegrees(Math.atan2(dz, dx))
-                        - 90;
+                Math.toDegrees(
+                        Math.atan2(dz, dx)
+                ) - 90;
 
         double yaw =
                 hunter.getLocation().getYaw();
@@ -500,7 +468,8 @@ public class BloodCompass implements Listener {
         double relative =
                 (angle - yaw + 360) % 360;
 
-        if (relative < 22.5 || relative >= 337.5)
+        if (relative < 22.5 ||
+            relative >= 337.5)
             return "⬆";
 
         if (relative < 67.5)
@@ -523,10 +492,6 @@ public class BloodCompass implements Listener {
 
         return "⬉";
     }
-
-    // =========================
-    // TIME FORMAT
-    // =========================
 
     private String formatTime(int seconds) {
 
