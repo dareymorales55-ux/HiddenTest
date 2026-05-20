@@ -26,11 +26,11 @@ import java.util.Arrays;
 
 public class DeathListener implements Listener {
 
-    // ✅ Regular Minecraft red
+    // Regular Minecraft red
     private static final String CAUGHT_COLOR =
             ChatColor.RED.toString();
 
-    // ✅ Orange for head name
+    // Orange for head name
     private static final String ORANGE =
             ChatColor.of("#FFA500").toString();
 
@@ -72,7 +72,6 @@ public class DeathListener implements Listener {
                     case ENTITY_EXPLOSION:
                     case BLOCK_EXPLOSION:
                     case PROJECTILE:
-
                         playerRelated = true;
                         break;
                 }
@@ -83,7 +82,8 @@ public class DeathListener implements Listener {
         // NAME WEAPON CHECK
         // =============================
 
-        boolean nameWeaponMatch = false;
+        boolean nameWeaponMatch =
+                false;
 
         if (killer != null) {
 
@@ -92,31 +92,29 @@ public class DeathListener implements Listener {
                             .getItemInMainHand();
 
             if (weapon != null &&
-                weapon.hasItemMeta()) {
+                weapon.hasItemMeta() &&
+                weapon.getItemMeta().hasDisplayName()) {
 
-                if (weapon.getItemMeta()
-                        .hasDisplayName()) {
+                String weaponName =
+                        ChatColor.stripColor(
+                                weapon.getItemMeta()
+                                        .getDisplayName()
+                        );
 
-                    String weaponName =
-                            ChatColor.stripColor(
-                                    weapon.getItemMeta()
-                                            .getDisplayName()
-                            );
-
-                    nameWeaponMatch =
-                            weaponName.equalsIgnoreCase(
-                                    realVictimName
-                            );
-                }
+                nameWeaponMatch =
+                        weaponName.equalsIgnoreCase(
+                                realVictimName
+                        );
             }
         }
 
         boolean revealed =
                 RevealManager.isRevealed(victim);
 
+        // If the player was not "caught",
+        // let them die normally.
         if (!nameWeaponMatch &&
             !(revealed && playerRelated)) {
-
             return;
         }
 
@@ -126,14 +124,21 @@ public class DeathListener implements Listener {
 
         if (UnknownTotem.hasUnknownTotem(victim)) {
 
+            // Consume the totem
             UnknownTotem.consumeTotem(victim);
 
+            // Remove reveal if they were revealed
+            RevealManager.hide(victim);
+
+            // Broadcast save message
             Bukkit.broadcastMessage(
                     ChatColor.RED +
-                    victim.getName() +
+                    realVictimName +
                     " has been saved by the Unknown Totem."
             );
 
+            // Let the player die normally,
+            // but do NOT catch/ban them.
             return;
         }
 
@@ -156,25 +161,28 @@ public class DeathListener implements Listener {
         // =============================
 
         ItemStack head =
-                new ItemStack(Material.PLAYER_HEAD);
+                new ItemStack(
+                        Material.PLAYER_HEAD
+                );
 
         SkullMeta meta =
                 (SkullMeta) head.getItemMeta();
 
         if (meta != null) {
 
-            // ✅ REAL PLAYER SKIN
+            // Real player skin
             PlayerProfile profile =
-                    ProfileManager.getRealProfile(victim);
+                    ProfileManager.getRealProfile(
+                            victim
+                    );
 
             if (profile != null) {
-
                 meta.setPlayerProfile(
                         profile.clone()
                 );
             }
 
-            // ✅ BOLD ORANGE NAME
+            // Bold orange head name
             meta.setDisplayName(
                     ORANGE +
                     "" +
@@ -210,42 +218,36 @@ public class DeathListener implements Listener {
             switch (env) {
 
                 case NORMAL:
-
                     dimensionLine =
                             ChatColor.GREEN +
                             "Overworld";
-
                     break;
 
                 case NETHER:
-
                     dimensionLine =
                             ChatColor.RED +
                             "Nether";
-
                     break;
 
                 case THE_END:
-
                     dimensionLine =
                             ChatColor.LIGHT_PURPLE +
                             "The End";
-
                     break;
 
                 default:
-
                     dimensionLine =
                             ChatColor.GRAY +
                             "Unknown";
-
                     break;
             }
 
-            meta.setLore(Arrays.asList(
-                    coords,
-                    dimensionLine
-            ));
+            meta.setLore(
+                    Arrays.asList(
+                            coords,
+                            dimensionLine
+                    )
+            );
 
             head.setItemMeta(meta);
         }
@@ -254,10 +256,11 @@ public class DeathListener implements Listener {
         // DROP HEAD
         // =============================
 
-        victim.getWorld().dropItemNaturally(
-                victim.getLocation(),
-                head
-        );
+        victim.getWorld()
+                .dropItemNaturally(
+                        victim.getLocation(),
+                        head
+                );
 
         // =============================
         // BROADCAST
@@ -266,7 +269,6 @@ public class DeathListener implements Listener {
         Bukkit.broadcastMessage(
                 ChatColor.YELLOW +
                 realVictimName +
-                ChatColor.YELLOW +
                 " left the game"
         );
 
@@ -295,14 +297,15 @@ public class DeathListener implements Listener {
         // BAN PLAYER
         // =============================
 
-        Bukkit.getBanList(BanList.Type.NAME)
-                .addBan(
-                        realVictimName,
-                        CAUGHT_COLOR +
-                        "You have been caught.",
-                        null,
-                        null
-                );
+        Bukkit.getBanList(
+                BanList.Type.NAME
+        ).addBan(
+                realVictimName,
+                CAUGHT_COLOR +
+                "You have been caught.",
+                null,
+                null
+        );
 
         // =============================
         // KICK PLAYER
@@ -322,7 +325,9 @@ public class DeathListener implements Listener {
 
         if (player.hasMetadata("caught")) {
 
-            event.setQuitMessage(null);
+            event.setQuitMessage(
+                    null
+            );
 
             player.removeMetadata(
                     "caught",
