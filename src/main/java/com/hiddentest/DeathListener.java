@@ -111,7 +111,7 @@ public class DeathListener implements Listener {
         boolean revealed =
                 RevealManager.isRevealed(victim);
 
-        // If the player was not "caught",
+        // If this death would NOT cause the player to be caught,
         // let them die normally.
         if (!nameWeaponMatch &&
             !(revealed && playerRelated)) {
@@ -124,10 +124,15 @@ public class DeathListener implements Listener {
 
         if (UnknownTotem.hasUnknownTotem(victim)) {
 
-            // Consume the totem
+            // Consume the totem from hand
             UnknownTotem.consumeTotem(victim);
 
-            // Remove reveal if they were revealed
+            // Ensure it does not appear in death drops
+            UnknownTotem.removeFromDrops(
+                    event.getDrops()
+            );
+
+            // Hide reveal if they were revealed
             RevealManager.hide(victim);
 
             // Broadcast save message
@@ -137,8 +142,8 @@ public class DeathListener implements Listener {
                     " has been saved by the Unknown Totem."
             );
 
-            // Let the player die normally,
-            // but do NOT catch/ban them.
+            // Player still dies normally,
+            // but is NOT caught/banned.
             return;
         }
 
